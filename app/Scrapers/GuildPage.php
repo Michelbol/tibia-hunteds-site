@@ -5,12 +5,16 @@ namespace App\Scrapers;
 use App\Character\CharacterService;
 use App\Character\StatusEnum;
 use App\Models\Character;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 use PHPHtmlParser\Dom;
 
 readonly class GuildPage {
-    public function __construct(private CharacterService $characterService,) {}
+    public Collection $characters;
+    public function __construct(private CharacterService $characterService,) {
+        $this->characters = collect();
+    }
 
     public function scrap(string $html): self {
         $dom = new Dom();
@@ -27,6 +31,7 @@ readonly class GuildPage {
                 $level = $this->extractLevelFromTr($htmlCharacter);
                 $joiningDate = $this->extractJoiningDateFromTr($htmlCharacter);
                 $character = $this->characterService->findOrCreate($name, $vocation, $level, $joiningDate);
+                $this->characters->push($character);
                 $this->updateCharacterStatus($character, $status);
             } catch (\Exception $exception) {
                 Log::error($exception->getMessage(), $exception->getTrace());

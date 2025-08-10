@@ -23,6 +23,8 @@ class WorldScraper extends Command {
 
             $guildPage = app(GuildPage::class);
             $guildPage->scrap($html);
+            $this->info('Guild Page Scraped Summary');
+            $this->info('Total Characters: '. $guildPage->characters->count());
         } catch (\Exception $e) {
             $this->info($e->getMessage());
         }
