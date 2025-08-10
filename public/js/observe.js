@@ -81,7 +81,7 @@ function changeType(newType) {
 async function setCharacterType(characterName, newType) {
     try {
         const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
-        const response = await fetch(`http://localhost:8000/set/${characterName}/as/${newType}`, {
+        const response = await fetch(`/set/${characterName}/as/${newType}`, {
 
             method: 'POST',
             headers: {
@@ -112,7 +112,7 @@ function copyToClipboard(text) {
 
 async function fetchOnlineCharacters() {
     try {
-        const response = await fetch('http://localhost:8000/get-online-characters');
+        const response = await fetch('/get-online-characters');
         const data = await response.json();
 
         clearTables();
