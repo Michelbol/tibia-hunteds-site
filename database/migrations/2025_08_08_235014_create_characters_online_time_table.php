@@ -4,19 +4,19 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-return new class extends Migration
-{
+return new class extends Migration {
     /**
      * Run the migrations.
      */
     public function up(): void
     {
-        Schema::create('online_characters', function (Blueprint $table) {
+        Schema::create('character_online_times', function (Blueprint $table) {
             $table->id();
-            $table->string('name');
-            $table->string('vocation');
-            $table->integer('level');
-            $table->date('joining_date');
+            $table->string('online_at');
+            $table->string('offline_at');
+
+            $table->unsignedBigInteger('character_id');
+            $table->foreign('character_id')->references('id')->on('characters');
             $table->timestamps();
         });
     }
@@ -26,6 +26,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('online_players');
+        Schema::dropIfExists('characters_hist');
     }
 };

@@ -1,6 +1,6 @@
 <?php
 
-namespace App;
+namespace App\Character;
 
 enum StatusEnum: string {
     case ONLINE = 'online';

@@ -1,6 +1,6 @@
 <?php
 
-namespace App;
+namespace App\Character;
 
 enum VocationEnum: string {
     case MS = 'Master Sorcerer';

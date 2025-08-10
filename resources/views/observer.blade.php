@@ -2,6 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>Online Characters - Dark Theme</title>
     <style>
         body {
@@ -67,6 +68,27 @@
             margin-bottom: 10px;
             color: #aaa;
         }
+        .context-menu {
+            position: absolute;
+            background-color: #333;
+            border: 1px solid #555;
+            color: #fff;
+            font-size: 12px;
+            z-index: 1000;
+            display: none;
+            box-shadow: 2px 2px 5px #000;
+            border-radius: 4px;
+        }
+
+        .context-menu div {
+            padding: 6px 12px;
+            cursor: pointer;
+        }
+
+        .context-menu div:hover {
+            background-color: #555;
+        }
+
     </style>
 </head>
 <body>
@@ -119,12 +141,24 @@
                 <th>Tempo Online</th>
             </tr>
             </thead>
-            <tbody></tbody>
+            <tbody>
+                <div id="contextMenu" class="context-menu">
+                    <div onclick="changeType('main')">Marcar como Main</div>
+                    <div onclick="changeType('bomba')">Marcar como Bomba</div>
+                    <div onclick="changeType('maker')">Marcar como Maker</div>
+                </div>
+            </tbody>
         </table>
     </div>
 </div>
 
 <script>
+    document.addEventListener("click", () => {
+        contextMenu.style.display = "none";
+    });
+    let contextMenuTarget = null;
+    const contextMenu = document.getElementById('contextMenu');
+
     let createdAtMap = new Map();
 
     function formatToHHMMSS(seconds) {
@@ -181,7 +215,45 @@
             copyToClipboard(text);
         });
 
+        row.addEventListener("contextmenu", (event) => {
+            event.preventDefault();
+            contextMenuTarget = character;
+            contextMenu.style.top = `${event.pageY}px`;
+            contextMenu.style.left = `${event.pageX}px`;
+            contextMenu.style.display = "block";
+        });
+
         tbody.appendChild(row);
+    }
+
+    function changeType(newType) {
+        if (!contextMenuTarget) return;
+        setCharacterType(contextMenuTarget.name, newType);
+        contextMenu.style.display = "none";
+    }
+
+    async function setCharacterType(characterName, newType) {
+        try {
+            const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+            const response = await fetch(`http://localhost:8000/set/${characterName}/as/${newType}`, {
+
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': csrfToken
+                },
+                body: JSON.stringify({ name: characterName })
+            });
+
+            if (!response.ok) {
+                throw new Error(`Erro ao atualizar personagem: ${response.status}`);
+            }
+
+            console.log(`Personagem ${characterName} atualizado para ${newType}`);
+            fetchOnlineCharacters(); // Atualiza a tabela após sucesso
+        } catch (error) {
+            console.error('Erro ao fazer POST:', error);
+        }
     }
 
     function copyToClipboard(text) {
@@ -201,8 +273,8 @@
             createdAtMap.clear();
 
             const sortedCharacters = data.onlineCharacters.sort((a, b) => {
-                const timeA = new Date() - new Date(a.created_at);
-                const timeB = new Date() - new Date(b.created_at);
+                const timeA = new Date() - new Date(a.online_at);
+                const timeB = new Date() - new Date(b.online_at);
                 return timeA - timeB; // ordem crescente: menor tempo online primeiro
             });
 

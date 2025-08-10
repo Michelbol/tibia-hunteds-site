@@ -1,11 +1,12 @@
 <?php
 
-namespace App;
+namespace App\Models;
 
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Model;
 
 /**
+ * @property int $id
  * @property string $name
  * @property string $vocation
  * @property int $level
@@ -28,7 +29,7 @@ class Character extends Model {
             'level' => $this->level,
             'joining_date' => $this->joining_date,
             'type' => $this->type,
-            'online_at' => $this->online_at->timezone('America/Sao_Paulo')->format('Y-m-d H:i:s'),
+            'online_at' => $this->online_at ? $this->online_at->timezone('America/Sao_Paulo')->format('Y-m-d H:i:s') : null,
         ];
     }
 }
