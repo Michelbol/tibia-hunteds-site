@@ -18,6 +18,7 @@ class WorldScraper extends Command {
             $timestamp = Carbon::now()->timestamp;
             $html = Browsershot::url('https://www.tibia.com/community/?subtopic=guilds&page=view&GuildName=Outlaw%20Warlords&timestamp='.$timestamp)
                 ->noSandbox()
+                ->userAgent('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115 Safari/537.36')
                 ->waitUntilNetworkIdle()
                 ->bodyHtml();
 
