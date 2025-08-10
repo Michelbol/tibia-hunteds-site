@@ -28,20 +28,7 @@
 </div>
 
 <script>
-    // --- Exemplo de dados (timestamps ISO em UTC) ---
-    const sampleData = [
-        { name: "CharA", sessions: [
-                {start:"2025-08-09T00:10:00Z", end:"2025-08-09T00:45:00Z"},
-                {start:"2025-08-09T08:20:00Z", end:"2025-08-09T09:05:00Z"}
-            ]},
-        { name: "CharB", sessions: [
-                {start:"2025-08-09T04:30:00Z", end:"2025-08-09T06:00:00Z"},
-                {start:"2025-08-09T12:00:00Z", end:"2025-08-09T18:10:00Z"}
-            ]},
-        { name: "CharC", sessions: [
-                {start:"2025-08-09T23:00:00Z", end:"2025-08-10T01:00:00Z"} // cruza para next day -> será cortado em 24h
-            ]},
-    ];
+    const sampleData = {!! $info !!};
 
     // --- Config ---
     const svg = document.getElementById('timeline');
@@ -132,7 +119,7 @@
     // set colors for clarity
     sampleData[0].color = '#ff6b6b'; sampleData[1].color = '#f1c40f'; sampleData[2].color = '#4caf50';
 
-    render(sampleData, '2025-08-09');
+    render(sampleData, '2025-08-10');
 
 </script>
 </body>

@@ -3,6 +3,7 @@
 namespace App\CharacterOnlineTime;
 
 use App\Models\CharacterOnlineTime;
+use App\Support\MysqlDateRange;
 use Carbon\Carbon;
 use Illuminate\Support\Collection;
 
@@ -21,7 +22,17 @@ readonly class CharacterOnlineTimeService {
         return $characterOnlineTime;
     }
 
-    public function retrieveOnlineTimeByOnlineAt(): Collection {
-        return $this->characterOnlineTimeRepository->retrieveOnlineTimeByOnlineAt();
+    public function retrieveOnlineTimeByOnlineAt(Carbon $date): Collection {
+        $mysqlBetween = MysqlDateRange::fromCarbons($date->copy()->startOfDay(), $date->copy()->endOfDay());
+        $charOnline = $this->characterOnlineTimeRepository->retrieveOnlineTimeByOnlineAt($mysqlBetween);
+        $groupedOnlineChars = $charOnline->groupBy('character_id');
+        $mapperOnlineChars = collect();
+        foreach ($groupedOnlineChars as $characterOnlineTime) {
+            $mapperOnlineChars->push([
+                'name' => $characterOnlineTime[0]->name,
+                'sessions' => $characterOnlineTime,
+            ]);
+        }
+        return $mapperOnlineChars;
     }
 }

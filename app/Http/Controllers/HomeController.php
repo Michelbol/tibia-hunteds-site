@@ -2,14 +2,16 @@
 
 namespace App\Http\Controllers;
 
-use App\Character\CharacterService;
-use Illuminate\Http\JsonResponse;
 use Illuminate\View\View;
+use Illuminate\Http\JsonResponse;
+use App\Character\CharacterService;
+use App\CharacterOnlineTime\CharacterOnlineTimeService;
 
 class HomeController extends Controller {
 
     public function __construct(
         private readonly CharacterService $characterService,
+        private readonly CharacterOnlineTimeService $characterOnlineTimeService,
     ){}
 
     public function index(): View {
@@ -26,6 +28,7 @@ class HomeController extends Controller {
     }
 
     public function getCharactersOnlineGantGraphics(): View {
-        return view('online-graphics-gant');
+        $info = $this->characterOnlineTimeService->retrieveOnlineTimeByOnlineAt(now());
+        return view('online-graphics-gant', compact('info'));
     }
 }
