@@ -4,8 +4,13 @@ namespace App\CharacterOnlineTime;
 
 use App\Models\CharacterOnlineTime;
 use Carbon\Carbon;
+use Illuminate\Support\Collection;
 
-class CharacterOnlineTimeService {
+readonly class CharacterOnlineTimeService {
+
+    public function __construct(
+        private CharacterOnlineTimeRepository $characterOnlineTimeRepository
+    ) {}
 
     public function create(int $characterId, Carbon $onlineAt): CharacterOnlineTime {
         $characterOnlineTime = new CharacterOnlineTime();
@@ -14,5 +19,9 @@ class CharacterOnlineTimeService {
         $characterOnlineTime->offline_at = now();
         $characterOnlineTime->save();
         return $characterOnlineTime;
+    }
+
+    public function retrieveOnlineTimeByOnlineAt(): Collection {
+        return $this->characterOnlineTimeRepository->retrieveOnlineTimeByOnlineAt();
     }
 }
