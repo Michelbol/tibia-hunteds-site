@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use Carbon\Carbon;
 use Illuminate\View\View;
 use Illuminate\Http\JsonResponse;
 use App\Character\CharacterService;
@@ -28,7 +29,13 @@ class HomeController extends Controller {
     }
 
     public function getCharactersOnlineGantGraphics(): View {
-        $info = $this->characterOnlineTimeService->retrieveOnlineTimeByOnlineAt(now());
-        return view('online-graphics-gant', compact('info'));
+        $requestDate = now();
+        $dateFromRequest = request()->get('date');
+        if (!is_null($dateFromRequest) && Carbon::hasFormat($dateFromRequest, 'Y-m-d')){
+            $requestDate = Carbon::createFromFormat('Y-m-d', request()->get('date'));
+        }
+        $info = $this->characterOnlineTimeService->retrieveOnlineTimeByOnlineAt($requestDate);
+        $day = $requestDate->format('Y-m-d');
+        return view('online-graphics-gant', compact('info', 'day'));
     }
 }

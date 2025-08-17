@@ -19,7 +19,7 @@
 </head>
 <body>
 <div class="container">
-    <h2>Timeline 24h — Períodos online</h2>
+    <h2>Timeline 24h — Períodos online - {{ $day }}</h2>
     <div id="chartWrap" style="position:relative;">
         <svg id="timeline" height="360" viewBox="0 0 1000 360" preserveAspectRatio="xMinYMin meet"></svg>
         <div id="tooltip" class="tooltip"></div>
@@ -61,7 +61,10 @@
     }
 
     function render(data, dayBase) {
-        svg.innerHTML = '';
+        let size = data.length;
+        svg.setAttribute('height', size * 41.25);
+        svg
+        .innerHTML = '';
         // background
         const defs = `<defs>
     <linearGradient id="g1" x1="0" x2="1"><stop offset="0" stop-color="#233"/><stop offset="1" stop-color="#1a1a2b"/></linearGradient>
@@ -119,7 +122,7 @@
     // set colors for clarity
     sampleData[0].color = '#ff6b6b'; sampleData[1].color = '#f1c40f'; sampleData[2].color = '#4caf50';
 
-    render(sampleData, '2025-08-10');
+    render(sampleData, '{{$day}}');
 
 </script>
 </body>

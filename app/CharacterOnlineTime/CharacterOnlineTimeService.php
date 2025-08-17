@@ -28,6 +28,11 @@ readonly class CharacterOnlineTimeService {
         $groupedOnlineChars = $charOnline->groupBy('character_id');
         $mapperOnlineChars = collect();
         foreach ($groupedOnlineChars as $characterOnlineTime) {
+            $characterOnlineTime->map(function ($onlineTime) use ($mapperOnlineChars) {
+                $onlineTime->start = $onlineTime->start->timezone('America/Sao_Paulo');
+                $onlineTime->end = $onlineTime->end->timezone('America/Sao_Paulo');
+                return $onlineTime;
+            });
             $mapperOnlineChars->push([
                 'name' => $characterOnlineTime[0]->name,
                 'sessions' => $characterOnlineTime,

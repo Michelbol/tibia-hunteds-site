@@ -17,5 +17,7 @@ class CharacterOnlineTime extends Model {
     protected $casts = [
         'online_at' => 'datetime',
         'offline_at' => 'datetime',
+        'start' => 'datetime',
+        'end' => 'datetime',
     ];
 }
