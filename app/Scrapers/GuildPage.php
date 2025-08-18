@@ -37,6 +37,7 @@ readonly class GuildPage {
                 Log::error($exception->getMessage(), $exception->getTrace());
             }
         });
+        $this->characterService->setCharacterNotInAsOffline($this->characters);
         return $this;
     }
 

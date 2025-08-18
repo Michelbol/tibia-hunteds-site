@@ -18,4 +18,8 @@ class CharacterRepository {
     public function firstCharacterByName(string $name): ?Character {
         return Character::where('name', $name)->first();
     }
+
+    public function setCharactersNotInAsOffline(Collection $characters): void {
+        Character::whereNotIn('id', $characters->pluck('id'))->update(['is_online' => false]);
+    }
 }

@@ -66,4 +66,8 @@ readonly class CharacterService {
         $this->characterOnlineTimeService->create($character->id, $character->online_at);
     }
 
+    public function setCharacterNotInAsOffline(Collection $characters): void {
+        $this->characterRepository->setCharactersNotInAsOffline($characters);
+    }
+
 }
