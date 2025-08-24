@@ -14,22 +14,34 @@ readonly class CharacterService {
         private CharacterOnlineTimeService $characterOnlineTimeService,
     ) {}
 
-    public function retrieveOnlinePlayers(): Collection {
-        return $this->characterRepository->getOnlinePlayer();
+    public function retrieveOnlinePlayers(?string $guildName = null): Collection {
+        return $this->characterRepository->getOnlinePlayer($guildName);
     }
 
     public function updateCharacterType(string $characterName, string $type): void {
-        $this->characterRepository->updateCharacterUsingName($characterName, $type);
+        $this->characterRepository->updateCharacterTypeUsingName($characterName, $type);
     }
 
-    public function create(string $name, string $vocation, int $level, string $joiningDate): Character {
+    public function create(string $name, string $vocation, int $level, string $joiningDate, string $guildName): Character {
         $character = new Character();
         $character->name = $name;
         $character->vocation = VocationEnum::from($vocation);
         $character->level = $level;
         $character->joining_date = Carbon::createFromFormat('M d Y', $joiningDate);
         $character->is_online = false;
+        $character->guild_name = $guildName;
         $character->online_at = null;
+        $character->save();
+
+        return $character;
+    }
+
+    public function update(Character $character, string $name, string $vocation, int $level, string $joiningDate, string $guildName): Character {
+        $character->name = $name;
+        $character->vocation = VocationEnum::from($vocation);
+        $character->level = $level;
+        $character->joining_date = Carbon::createFromFormat('M d Y', $joiningDate);
+        $character->guild_name = urldecode($guildName);
         $character->save();
 
         return $character;
@@ -50,13 +62,14 @@ readonly class CharacterService {
         $character->save();
     }
 
-    public function findOrCreate(string $name, string $vocation, string $level, string $joiningDate): Character {
+    public function findOrCreate(string $name, string $vocation, string $level, string $joiningDate, string $guildName): Character {
         $character = $this->characterRepository->firstCharacterByName($name);
         if ($character) {
+            $this->update($character, $name, $vocation, $level, $joiningDate, $guildName);
             return $character;
         }
 
-        return $this->create($name, $vocation, $level, $joiningDate);
+        return $this->create($name, $vocation, $level, $joiningDate, $guildName);
     }
 
     private function saveCharacterOnlineTime(Character $character): void {
@@ -66,8 +79,18 @@ readonly class CharacterService {
         $this->characterOnlineTimeService->create($character->id, $character->online_at);
     }
 
-    public function setCharacterNotInAsOffline(Collection $characters): void {
-        $this->characterRepository->setCharactersNotInAsOffline($characters);
+    public function setCharacterNotInAsOffline(Collection $characters, string $guildName): void {
+        $this->characterRepository->setCharactersNotInAsOffline($characters, $guildName);
+    }
+
+    public function updateCharacterPosition(string $characterName, string $position): void {
+        $character = $this->characterRepository->firstCharacterByName($characterName);
+        if (is_null($character)) {
+            return;
+        }
+        $character->position = $position;
+        $character->position_time = now();
+        $character->save();
     }
 
 }

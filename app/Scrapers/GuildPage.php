@@ -16,28 +16,28 @@ readonly class GuildPage {
         $this->characters = collect();
     }
 
-    public function scrap(string $html): self {
+    public function scrap(string $html, ?string $guildName = ''): self {
         $dom = new Dom();
         $dom->load($html);
 
         $htmlCharacters = $dom->find('#guilds .TableContainer .TableContent tr');
         unset($htmlCharacters[0]);
         unset($htmlCharacters[count($htmlCharacters)]);
-        $htmlCharacters->each(function (Dom\HtmlNode $htmlCharacter) {
+        $htmlCharacters->each(function (Dom\HtmlNode $htmlCharacter) use ($guildName) {
             try {
                 $status = $this->extractStatusFromTr($htmlCharacter);
                 $name = $this->extractNameFromTr($htmlCharacter);
                 $vocation = $this->extractVocationFromTr($htmlCharacter);
                 $level = $this->extractLevelFromTr($htmlCharacter);
                 $joiningDate = $this->extractJoiningDateFromTr($htmlCharacter);
-                $character = $this->characterService->findOrCreate($name, $vocation, $level, $joiningDate);
+                $character = $this->characterService->findOrCreate($name, $vocation, $level, $joiningDate, $guildName);
                 $this->characters->push($character);
                 $this->updateCharacterStatus($character, $status);
             } catch (\Exception $exception) {
                 Log::error($exception->getMessage(), $exception->getTrace());
             }
         });
-        $this->characterService->setCharacterNotInAsOffline($this->characters);
+        $this->characterService->setCharacterNotInAsOffline($this->characters, $guildName);
         return $this;
     }
 

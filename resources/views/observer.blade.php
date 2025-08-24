@@ -11,6 +11,21 @@
 <h1>Online Characters</h1>
 <div id="lastUpdate">Atualizado agora</div>
 <a href="{{ route('online-graphics-gant') }}">Análise de Players Online</a>
+<div>
+    <form action="{{ route('home', ['guild' => $search]) }}">
+        <select name="guild_name" id="guild-name">
+            @foreach($guilds as $guild)
+                <option
+                    value="{!! $guild['value'] !!}"
+                    @if($search === $guild['value']) selected="selected" @endif
+                >
+                    {!! $guild['name'] !!}
+                </option>
+            @endforeach
+        </select>
+        <button type="submit">Change Guild</button>
+    </form>
+</div>
 
 <div class="tables-container">
     <div class="table-box">
@@ -23,6 +38,8 @@
                 <th>Level</th>
                 <th>Vocation</th>
                 <th>Tempo Online</th>
+                <th>Tempo Exiva</th>
+                <th>Exiva</th>
             </tr>
             </thead>
             <tbody></tbody>
@@ -39,6 +56,8 @@
                 <th>Level</th>
                 <th>Vocation</th>
                 <th>Tempo Online</th>
+                <th>Tempo Exiva</th>
+                <th>Exiva</th>
             </tr>
             </thead>
             <tbody></tbody>
@@ -55,13 +74,15 @@
                 <th>Level</th>
                 <th>Vocation</th>
                 <th>Tempo Online</th>
+                <th>Tempo Exiva</th>
+                <th>Exiva</th>
             </tr>
             </thead>
             <tbody></tbody>
         </table>
     </div>
 
-    <div class="table-box">
+    <div class="table-box tabela">
         <h2>Makers</h2>
         <table id="makersTable">
             <thead>
@@ -71,6 +92,8 @@
                 <th>Level</th>
                 <th>Vocation</th>
                 <th>Tempo Online</th>
+                <th>Tempo Exiva</th>
+                <th>Exiva</th>
             </tr>
             </thead>
             <tbody>
@@ -79,6 +102,10 @@
                     <div onclick="changeType('bomba')">Marcar como Bomba</div>
                     <div onclick="changeType('bombao')">Marcar como Bombão</div>
                     <div onclick="changeType('maker')">Marcar como Maker</div>
+                    <div>
+                        <input id="input-position" type="text">
+                        <button type="button" onclick="changePosition()">Submit</button>
+                    </div>
                 </div>
             </tbody>
         </table>

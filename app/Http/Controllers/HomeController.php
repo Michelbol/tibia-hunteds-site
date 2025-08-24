@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use Carbon\Carbon;
+use Illuminate\Http\Request;
 use Illuminate\View\View;
 use Illuminate\Http\JsonResponse;
 use App\Character\CharacterService;
@@ -15,16 +16,37 @@ class HomeController extends Controller {
         private readonly CharacterOnlineTimeService $characterOnlineTimeService,
     ){}
 
-    public function index(): View {
-        return view('observer');
+    public function index(Request $request): View {
+        $guilds = [
+            [
+                'name' => 'Outlaw Warlords',
+                'value' => 'Outlaw%20Warlords'
+            ],
+            [
+                'name' => 'Quelibraland',
+                'value' => 'Quelibraland'
+            ]
+        ];
+        $search = $request->get('guild_name');
+        return view('observer', compact('guilds', 'search'));
     }
 
-    public function getOnlineCharacters(): JsonResponse {
-        return response()->json(['onlineCharacters' => $this->characterService->retrieveOnlinePlayers()]);
+    public function getOnlineCharacters(Request $request): JsonResponse {
+        $guildName = $request->get('guild_name');
+        return response()->json(['onlineCharacters' => $this->characterService->retrieveOnlinePlayers($guildName)]);
     }
 
     public function setCharacterType(string $characterName, string $type): JsonResponse {
         $this->characterService->updateCharacterType($characterName, $type);
+        return response()->json();
+    }
+
+    public function updateCharacterPosition(Request $request, string $characterName): JsonResponse {
+        $position = $request->get('position');
+        if (is_null($position)) {
+            return response()->json();
+        }
+        $this->characterService->updateCharacterPosition($characterName, $position);
         return response()->json();
     }
 
