@@ -77,7 +77,6 @@ function addRow(tableId, index, character) {
         const text = `exiva "${character.name}"`;
         copyToClipboard(text);
     });
-
     row.addEventListener("contextmenu", (event) => {
         event.preventDefault();
         contextMenuTarget = character;
@@ -195,6 +194,11 @@ async function fetchOnlineCharacters() {
     } catch (error) {
         console.error('Erro ao buscar personagens:', error);
     }
+}
+
+function copySio() {
+    let characterName = contextMenuTarget.name;
+    copyToClipboard(`exura sio "${characterName}"`)
 }
 
 setInterval(updateCreatedAtTimers, 1000);

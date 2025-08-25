@@ -102,6 +102,7 @@
                     <div onclick="changeType('bomba')">Marcar como Bomba</div>
                     <div onclick="changeType('bombao')">Marcar como Bombão</div>
                     <div onclick="changeType('maker')">Marcar como Maker</div>
+                    <div onclick="copySio()">Copiar Sio</div>
                     <div>
                         <input id="input-position" type="text">
                         <button type="button" onclick="changePosition()">Submit</button>
