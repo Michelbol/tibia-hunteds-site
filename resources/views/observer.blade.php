@@ -12,19 +12,7 @@
 <div id="lastUpdate">Atualizado agora</div>
 <a href="{{ route('online-graphics-gant') }}">Análise de Players Online</a>
 <div>
-    <form action="{{ route('home', ['guild' => $search]) }}">
-        <select name="guild_name" id="guild-name">
-            @foreach($guilds as $guild)
-                <option
-                    value="{!! $guild['value'] !!}"
-                    @if($search === $guild['value']) selected="selected" @endif
-                >
-                    {!! $guild['name'] !!}
-                </option>
-            @endforeach
-        </select>
-        <button type="submit">Change Guild</button>
-    </form>
+    <input readonly disabled name="guild_name" id="guild-name" value="{{ $guilds[0]['value'] }}">
 </div>
 
 <div class="tables-container">
@@ -97,17 +85,17 @@
             </tr>
             </thead>
             <tbody>
-                <div id="contextMenu" class="context-menu">
-                    <div onclick="changeType('main')">Marcar como Main</div>
-                    <div onclick="changeType('bomba')">Marcar como Bomba</div>
-                    <div onclick="changeType('bombao')">Marcar como Bombão</div>
-                    <div onclick="changeType('maker')">Marcar como Maker</div>
-                    <div onclick="copySio()">Copiar Sio</div>
-                    <div>
-                        <input id="input-position" type="text">
-                        <button type="button" onclick="changePosition()">Submit</button>
-                    </div>
+            <div id="contextMenu" class="context-menu">
+                <div onclick="changeType('main')">Marcar como Main</div>
+                <div onclick="changeType('bomba')">Marcar como Bomba</div>
+                <div onclick="changeType('bombao')">Marcar como Bombão</div>
+                <div onclick="changeType('maker')">Marcar como Maker</div>
+                <div onclick="copySio()">Copiar Sio</div>
+                <div>
+                    <input id="input-position" type="text">
+                    <button type="button" onclick="changePosition()">Submit</button>
                 </div>
+            </div>
             </tbody>
         </table>
     </div>
