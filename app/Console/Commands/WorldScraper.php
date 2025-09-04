@@ -27,7 +27,7 @@ class WorldScraper extends Command {
 
     public function handle(): void {
         try {
-            $start = microtime(true);
+            $globalExecutionBegin = microtime(true);
             $guild = $this->argument('guild');
             if ($guild === self::GUILDS_NAME[0]['id']) {
                 $searchGuild = self::GUILDS_NAME[0]['name'];
@@ -36,24 +36,24 @@ class WorldScraper extends Command {
             }
             $timestamp = Carbon::now()->timestamp;
             $url = "https://www.tibia.com/community/?subtopic=guilds&page=view&GuildName=$searchGuild&timestamp=$timestamp" . random_int(100, 200);
+            $requestTimeBegin = microtime(true);
             $html = Browsershot::url($url)
                 ->noSandbox()
                 ->userAgent('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115 Safari/537.36')
                 ->waitUntilNetworkIdle()
                 ->bodyHtml();
+            $requestTimeEnd = microtime(true);
 
+            $scrapingTimeBegin = microtime(true);
             $guildPage = app(GuildPage::class);
             $guildPage->scrap($html, $searchGuild);
-            $end = microtime(true);
-            $executionTime = $end - $start;
-            $executionCrawler = new ExecutionCrawler();
-            $executionCrawler->guild_name = $searchGuild;
-            $executionCrawler->url = $url;
-            $executionCrawler->qtd_characters = $guildPage->characters->count();
-            $executionCrawler->qtd_character_online = $guildPage->getOnlineCharacters();
-            $executionCrawler->qtd_character_offline = $guildPage->getOfflineCharacters();
-            $executionCrawler->execution_time = $executionTime;
-            $executionCrawler->save();
+            $scrapingTimeEnd = microtime(true);
+
+            $globalExecutionEnd = microtime(true);
+            $executionTime = $globalExecutionEnd - $globalExecutionBegin;
+            $scrapingTime = $scrapingTimeEnd - $scrapingTimeBegin;
+            $requestTime = $requestTimeEnd - $requestTimeBegin;
+            $this->createExecutionCrawler($searchGuild, $url, $guildPage, $executionTime, $scrapingTime, $requestTime);
 
 
             $this->info('Guild Page Scraped Summary');
@@ -61,5 +61,18 @@ class WorldScraper extends Command {
         } catch (\Exception $e) {
             $this->info($e->getMessage());
         }
+    }
+
+    private function createExecutionCrawler(string $searchGuild, string $url, GuildPage $guildPage, float $executionTime, float $scrapingTime, float $requestTime): void {
+        $executionCrawler = new ExecutionCrawler();
+        $executionCrawler->guild_name = $searchGuild;
+        $executionCrawler->url = $url;
+        $executionCrawler->qtd_characters = $guildPage->characters->count();
+        $executionCrawler->qtd_character_online = $guildPage->getOnlineCharacters();
+        $executionCrawler->qtd_character_offline = $guildPage->getOfflineCharacters();
+        $executionCrawler->execution_time = $executionTime;
+        $executionCrawler->scraping_time = $scrapingTime;
+        $executionCrawler->request_time = $requestTime;
+        $executionCrawler->save();
     }
 }
