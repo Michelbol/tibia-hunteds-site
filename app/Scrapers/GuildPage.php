@@ -28,7 +28,6 @@ class GuildPage {
             $trAttributes = $htmlCharacter->getAttributes();
             $isInvitationBoard = $htmlCharacter->find('.DoNotBreak');
             if ($isInvitationBoard->count() > 0 || (isset($trAttributes['class']) && $trAttributes['class'] === 'LabelH')) {
-                Log::info('é label ou invitation board');
                 return;
             }
             try {
