@@ -5,6 +5,7 @@ namespace App\Scrapers;
 use App\Character\CharacterService;
 use App\Character\StatusEnum;
 use App\Models\Character;
+use App\Scrapers\Exceptions\NotFoundStatusInPage;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
@@ -24,6 +25,12 @@ class GuildPage {
         unset($htmlCharacters[0]);
         unset($htmlCharacters[count($htmlCharacters)]);
         $htmlCharacters->each(function (Dom\HtmlNode $htmlCharacter) use ($guildName) {
+            $trAttributes = $htmlCharacter->getAttributes();
+            $isInvitationBoard = $htmlCharacter->find('.DoNotBreak');
+            if ($isInvitationBoard->count() > 0 || (isset($trAttributes['class']) && $trAttributes['class'] === 'LabelH')) {
+                Log::info('é label ou invitation board');
+                return;
+            }
             try {
                 $status = $this->extractStatusFromTr($htmlCharacter);
                 $name = $this->extractNameFromTr($htmlCharacter);
@@ -33,6 +40,10 @@ class GuildPage {
                 $character = $this->characterService->findOrCreate($name, $vocation, $level, $joiningDate, $guildName);
                 $this->characters->push($character);
                 $this->updateCharacterStatus($character, $status);
+            } catch (NotFoundStatusInPage $e) {
+                Log::info('[Status Not Found Begin]');
+                Log::info($e->getHtmlNode()->getAttributes());
+                Log::info('[Status Not Found End]');
             } catch (\Exception $exception) {
                 Log::error($exception->getMessage(), $exception->getTrace());
             }
@@ -51,7 +62,11 @@ class GuildPage {
     }
 
     private function extractStatusFromTr(Dom\HtmlNode $htmlCharacter): string {
-        return $this->getStatus($htmlCharacter->find('.onlinestatus span')->innerHtml());
+        $span = $htmlCharacter->find('.onlinestatus span');
+        if ($span->count() === 0) {
+            throw new NotFoundStatusInPage($htmlCharacter);
+        }
+        return $this->getStatus($span->innerHtml());
     }
 
     private function extractNameFromTr(Dom\HtmlNode $htmlCharacter): string {
