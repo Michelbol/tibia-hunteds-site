@@ -10,7 +10,7 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 use PHPHtmlParser\Dom;
 
-readonly class GuildPage {
+class GuildPage {
     public Collection $characters;
     public function __construct(private CharacterService $characterService,) {
         $this->characters = collect();
@@ -77,5 +77,23 @@ readonly class GuildPage {
             return;
         }
         $this->characterService->setCharacterAsOnline($character);
+    }
+
+    public function getOnlineCharacters(): int {
+        return $this->characters->reduce(function (?int $carry, Character $character) {
+            if ($character->is_online) {
+                $carry++;
+            }
+            return $carry;
+        });
+    }
+
+    public function getOfflineCharacters(): int {
+        return $this->characters->reduce(function (?int $carry, Character $character) {
+            if (!$character->is_online) {
+                $carry++;
+            }
+            return $carry;
+        });
     }
 }

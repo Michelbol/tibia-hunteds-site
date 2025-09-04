@@ -2,6 +2,7 @@
 
 namespace App\Console\Commands;
 
+use App\Models\ExecutionCrawler;
 use App\Scrapers\GuildPage;
 use Carbon\Carbon;
 use Illuminate\Console\Command;
@@ -26,6 +27,7 @@ class WorldScraper extends Command {
 
     public function handle(): void {
         try {
+            $start = microtime(true);
             $guild = $this->argument('guild');
             if ($guild === self::GUILDS_NAME[0]['id']) {
                 $searchGuild = self::GUILDS_NAME[0]['name'];
@@ -33,7 +35,8 @@ class WorldScraper extends Command {
                 $searchGuild = self::GUILDS_NAME[1]['name'];
             }
             $timestamp = Carbon::now()->timestamp;
-            $html = Browsershot::url("https://www.tibia.com/community/?subtopic=guilds&page=view&GuildName=$searchGuild&timestamp=$timestamp".random_int(100,200))
+            $url = "https://www.tibia.com/community/?subtopic=guilds&page=view&GuildName=$searchGuild&timestamp=$timestamp" . random_int(100, 200);
+            $html = Browsershot::url($url)
                 ->noSandbox()
                 ->userAgent('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115 Safari/537.36')
                 ->waitUntilNetworkIdle()
@@ -41,6 +44,18 @@ class WorldScraper extends Command {
 
             $guildPage = app(GuildPage::class);
             $guildPage->scrap($html, $searchGuild);
+            $end = microtime(true);
+            $executionTime = $end - $start;
+            $executionCrawler = new ExecutionCrawler();
+            $executionCrawler->guild_name = $searchGuild;
+            $executionCrawler->url = $url;
+            $executionCrawler->qtd_characters = $guildPage->characters->count();
+            $executionCrawler->qtd_character_online = $guildPage->getOnlineCharacters();
+            $executionCrawler->qtd_character_offline = $guildPage->getOfflineCharacters();
+            $executionCrawler->execution_time = $executionTime;
+            $executionCrawler->save();
+
+
             $this->info('Guild Page Scraped Summary');
             $this->info('Total Characters: '. $guildPage->characters->count());
         } catch (\Exception $e) {
