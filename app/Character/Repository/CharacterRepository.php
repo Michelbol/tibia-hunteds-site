@@ -26,14 +26,22 @@ class CharacterRepository {
         return Character::where('name', $name)->first();
     }
 
-    public function setCharactersNotInAsOffline(Collection $characters, string $guildName): void {
-        Character
-            ::whereNotIn('id', $characters->pluck('id'))
-            ->where('guild_name', $guildName)
-            ->update(['is_online' => false]);
+    public function updateAllOfflineAsOnlineAtNull(): void {
+        Character::where('is_online', false)->update(['online_at' => null]);
     }
 
-    public function updateCharacterPositionUsingName(string $characterName, string $position): void {
-        Character::where('name', $characterName)->update(['position' => $position]);
+    public function updateSetOnlineAtNowForAllOnlinePlayersWithoutOnlineAt(): void {
+        Character
+            ::where('is_online', true)
+            ->where('online_at', null)
+            ->update(['online_at' => now()]);
+    }
+
+    public function upsertCharacters(Collection $characters): void {
+        Character::upsert(
+            $characters->toArray(),
+            ['name'],
+            ['name', 'vocation', 'level', 'joining_date', 'is_online', 'guild_name'],
+        );
     }
 }
