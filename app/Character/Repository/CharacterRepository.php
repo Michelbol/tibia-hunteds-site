@@ -44,4 +44,11 @@ class CharacterRepository {
             ['name', 'vocation', 'level', 'joining_date', 'is_online', 'guild_name'],
         );
     }
+
+    public function updateAllCharactersAsOffline(): void {
+        Character::update([
+            'online_at' => null,
+            'is_online' => false,
+        ]);
+    }
 }

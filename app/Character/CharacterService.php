@@ -70,4 +70,8 @@ readonly class CharacterService {
     public function updateAllOnline(): void {
         $this->characterRepository->updateSetOnlineAtNowForAllOnlinePlayersWithoutOnlineAt();
     }
+
+    public function setAllCharactersAsOffline(): void {
+        $this->characterRepository->updateAllCharactersAsOffline();
+    }
 }

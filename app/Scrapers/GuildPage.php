@@ -25,6 +25,10 @@ class GuildPage {
     public function scrap(string $html, ?string $guildName = ''): self {
         $dom = new Dom();
         $dom->load($html);
+        $ssHour = $this->getServerSaveHour();
+        if (Carbon::now()->isBetween($ssHour, $ssHour->copy()->addMinutes(10))) {
+            $this->characterService->setAllCharactersAsOffline();
+        }
 
         $htmlCharacters = $dom->find('#guilds .TableContainer .TableContent tr');
         unset($htmlCharacters[0]);
@@ -85,7 +89,7 @@ class GuildPage {
         return $this->removeSpace($name);
     }
 
-    function getCharacterFromTd(Dom\Collection $cells, ?string $guildName): array {
+    private function getCharacterFromTd(Dom\Collection $cells, ?string $guildName): array {
         return [
             'name' => $this->getName($cells[1]),
             'vocation' => VocationEnum::from($cells[2]->innerHtml()),
@@ -94,5 +98,9 @@ class GuildPage {
             'is_online' => $this->getStatus($cells[5]->innerHtml()) === StatusEnum::ONLINE->value,
             'guild_name' => $guildName
         ];
+    }
+
+    private function getServerSaveHour(): Carbon {
+        return Carbon::now()->timezone('America/Sao_paulo')->startOfDay()->addHours(5);
     }
 }
