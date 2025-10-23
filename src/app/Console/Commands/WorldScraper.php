@@ -40,6 +40,10 @@ class WorldScraper extends Command {
             $html = Browsershot::url($url)
                 ->noSandbox()
                 ->userAgent('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115 Safari/537.36')
+                ->setChromePath('/usr/bin/google-chrome')
+                ->windowSize(1366, 768)
+                ->timeout(60000)
+                ->setOption('headless', false)
                 ->waitUntilNetworkIdle()
                 ->bodyHtml();
             $requestTimeEnd = microtime(true);

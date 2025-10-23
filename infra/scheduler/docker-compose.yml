@@ -18,6 +18,9 @@ services:
       - APP_KEY=${APP_KEY}
     networks:
       - laravel
+      - db_laravel
 networks:
   laravel:
     driver: bridge
+  db_laravel:
+    external: true
