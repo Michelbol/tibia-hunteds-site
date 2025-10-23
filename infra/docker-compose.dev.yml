@@ -1,0 +1,41 @@
+services:
+  web:
+    extends:
+      file: ./app_web/docker-compose.yml
+      service: web
+    volumes:
+      - ./../src:/var/www/html
+      - ./app_web/nginx/default.dev.conf:/etc/nginx/conf.d/default.conf
+    ports:
+      - "8080:80"
+
+  app:
+    extends:
+      file: ./app_web/docker-compose.yml
+      service: app
+    volumes:
+      - ./../src:/var/www/html
+      - ./app_web/php/xdebug.ini:/usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini
+    environment:
+      XDEBUG_MODE: debug,coverage
+      XDEBUG_CONFIG: client_host=host.docker.internal client_port=9003
+
+  db:
+    extends:
+      file: ./db/docker-compose.yml
+      service: db
+
+  scheduler:
+    extends:
+      file: ./scheduler/docker-compose.yml
+      service: scheduler
+    volumes:
+      - ./../src:/var/www/html
+
+networks:
+  public:
+  laravel:
+    driver: bridge
+
+volumes:
+  dbdata:
