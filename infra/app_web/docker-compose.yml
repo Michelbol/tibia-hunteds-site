@@ -8,7 +8,6 @@ services:
       - "80:80"
     networks:
       - laravel
-      - db_laravel
     depends_on:
       - app
   app:
@@ -31,9 +30,6 @@ services:
       - XDEBUG_MODE=off
     networks:
       - laravel
-      - db_laravel
 networks:
   laravel:
     driver: bridge
-  db_laravel:
-    external: true
