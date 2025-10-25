@@ -9,7 +9,7 @@ services:
       sh -c "while true; do php artisan inspire >> /dev/null 2>&1; sleep 10; done"
     environment:
       - DB_CONNECTION=${DB_CONNECTION}
-      - DB_HOST=db
+      - DB_HOST=${DB_HOST}
       - DB_PORT=${DB_PORT}
       - DB_DATABASE=${DB_DATABASE}
       - DB_USERNAME=${DB_USERNAME}
