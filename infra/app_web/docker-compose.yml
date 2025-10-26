@@ -7,6 +7,7 @@ services:
       - /etc/letsencrypt:/etc/letsencrypt:ro
     ports:
       - "80:80"
+      - "443:443"
     networks:
       - laravel
     depends_on:
