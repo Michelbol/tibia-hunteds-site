@@ -1,0 +1,16 @@
+[Unit]
+Description=Laravel World Scraper
+After=network.target
+
+[Service]
+Type=simple
+User=www-data
+WorkingDirectory=/var/www/tibia-hunteds-site/src
+ExecStart=php artisan world-scraper
+Restart=always
+RestartSec=10
+StandardOutput=append:/var/log/world-scraper.log
+StandardError=append:/var/log/world-scraper.log
+
+[Install]
+WantedBy=multi-user.target
