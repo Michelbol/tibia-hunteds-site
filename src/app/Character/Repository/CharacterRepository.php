@@ -27,14 +27,22 @@ class CharacterRepository {
     }
 
     public function updateAllOfflineAsOnlineAtNull(): void {
-        Character::where('is_online', false)->update(['online_at' => null]);
+        Character::where('is_online', false)->update([
+            'online_at' => null,
+            'position' => null,
+            'position_time' => null,
+        ]);
     }
 
     public function updateSetOnlineAtNowForAllOnlinePlayersWithoutOnlineAt(): void {
         Character
             ::where('is_online', true)
             ->where('online_at', null)
-            ->update(['online_at' => now()]);
+            ->update([
+                'online_at' => now(),
+                'position' => null,
+                'position_time' => null,
+            ]);
     }
 
     public function upsertCharacters(Collection $characters): void {
@@ -49,6 +57,8 @@ class CharacterRepository {
         Character::update([
             'online_at' => null,
             'is_online' => false,
+            'position' => null,
+            'position_time' => null,
         ]);
     }
 }
