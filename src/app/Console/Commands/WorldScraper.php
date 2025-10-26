@@ -39,44 +39,9 @@ class WorldScraper extends Command {
             $requestTimeBegin = microtime(true);
             $html = Browsershot::url($url)
                 ->setChromePath(env('PUPPETEER_EXECUTABLE_PATH', '/usr/bin/google-chrome'))
-                ->noSandbox() // adiciona --no-sandbox
-                ->setOption('args', [
-                    // flags essenciais para rodar headless em container
-                    '--disable-gpu',
-                    '--disable-dev-shm-usage',
-                    '--disable-software-rasterizer',
-                    '--disable-extensions',
-                    '--disable-background-networking',
-                    '--disable-background-timer-throttling',
-                    '--disable-client-side-phishing-detection',
-                    '--disable-default-apps',
-                    '--disable-setuid-sandbox',
-                    '--no-zygote',
-                    '--single-process',
-                    '--no-first-run',
-                    '--no-default-browser-check',
-                    '--disable-blink-features=AutomationControlled',
-                    // opcional: usar user-data-dir temporário se quiser cookies persistidos
-                    '--user-data-dir=/tmp/chrome-user-data',
-                ])
-                ->userAgent('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/118.0.5993.70 Safari/537.36')
-                ->setExtraHttpHeaders([
-                    'Accept-Language' => 'en-US,en;q=0.9',
-                    'sec-ch-ua' => '"Chromium";v="118", "Google Chrome";v="118", "Not A;Brand";v="24"',
-                    'sec-ch-ua-platform' => '"Windows"',
-                ])
+                ->noSandbox()
+                ->userAgent('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115 Safari/537.36')
                 ->waitUntilNetworkIdle()
-                ->setDelay(2000) // espera extra (ms) pra passar verificações JS
-                // injeta pequenos scripts pra mascarar navigator.webdriver e outros sinais
-                ->evaluateJavascript(<<<'JS'
-        delete navigator.__proto__.webdriver;
-        Object.defineProperty(navigator, 'webdriver', { get: () => undefined });
-        // plugins & mimeTypes (básico)
-        Object.defineProperty(navigator, 'plugins', { get: () => [1,2,3,4,5] });
-        Object.defineProperty(navigator, 'languages', { get: () => ['en-US','en'] });
-        true;
-    JS
-                )
                 ->bodyHtml();
             $requestTimeEnd = microtime(true);
 
