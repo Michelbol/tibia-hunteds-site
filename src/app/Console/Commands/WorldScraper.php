@@ -16,13 +16,13 @@ class WorldScraper extends Command {
 
     private const GUILDS_NAME = [
         [
+            'id' => 'time',
+            'name' => 'quelibraland'
+        ],
+        [
             'id' => 'contra',
             'name' => 'Outlaw%20Warlords'
         ],
-        [
-            'id' => 'time',
-            'name' => 'quelibraland'
-        ]
     ];
 
     public function handle(): void {

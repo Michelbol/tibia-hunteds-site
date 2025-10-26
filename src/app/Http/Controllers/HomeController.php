@@ -19,8 +19,8 @@ class HomeController extends Controller {
     public function index(Request $request): View {
         $guilds = [
             [
-                'name' => 'Quelibraland',
-                'value' => 'Quelibraland'
+                'name' => 'Outlaw Warlords',
+                'value' => 'Outlaw%20Warlords'
             ]
         ];
         $search = $request->get('guild_name');
@@ -28,7 +28,7 @@ class HomeController extends Controller {
     }
 
     public function getOnlineCharacters(Request $request): JsonResponse {
-        $guildName = 'Quelibraland';
+        $guildName = 'Outlaw%20Warlords';
         return response()->json(['onlineCharacters' => $this->characterService->retrieveOnlinePlayers($guildName)]);
     }
 

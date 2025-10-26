@@ -10,9 +10,8 @@
 
 <h1>Online Characters</h1>
 <div id="lastUpdate">Atualizado agora</div>
-<a href="{{ route('online-graphics-gant') }}">Análise de Players Online</a>
 <div>
-    <input readonly disabled name="guild_name" id="guild-name" value="{{ $guilds[0]['value'] }}">
+    <input readonly disabled name="guild_name" id="guild-name" value="{{ $guilds[0]['name'] }}">
 </div>
 
 <div class="tables-container">
