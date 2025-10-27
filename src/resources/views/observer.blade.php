@@ -84,6 +84,7 @@
             </tr>
             </thead>
             <tbody>
+            @if(\Illuminate\Support\Facades\Auth::hasUser())
             <div id="contextMenu" class="context-menu">
                 <div onclick="changeType('main')">Marcar como Main</div>
                 <div onclick="changeType('bomba')">Marcar como Bomba</div>
@@ -95,6 +96,7 @@
                     <button type="button" onclick="changePosition()">Submit</button>
                 </div>
             </div>
+            @endif
             </tbody>
         </table>
     </div>

@@ -204,4 +204,4 @@ function copySio() {
 setInterval(updateCreatedAtTimers, 1000);
 setInterval(updatePositionTimeTimers, 1000);
 fetchOnlineCharacters();
-setInterval(fetchOnlineCharacters, 3000);
+setInterval(fetchOnlineCharacters, 1500);
