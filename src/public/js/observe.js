@@ -152,7 +152,7 @@ async function setAsAttackerCharacter(characterName, isAttacker) {
             throw new Error(`Erro ao atualizar personagem: ${response.status}`);
         }
 
-        console.log(`Personagem ${characterName} atualizado para ${newType}`);
+        console.log(`Personagem ${characterName} atualizado para ${isAttacker}`);
         fetchOnlineCharacters(); // Atualiza a tabela após sucesso
     } catch (error) {
         console.error('Erro ao fazer POST:', error);
