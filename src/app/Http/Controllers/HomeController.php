@@ -37,7 +37,7 @@ class HomeController extends Controller {
         return response()->json();
     }
 
-    public function setCharacterAsAttacker(string $characterName, bool $isAttacker): JsonResponse {
+    public function setCharacterAsAttacker(string $characterName, string $isAttacker): JsonResponse {
         $this->characterService->updateCharacterIsAttacker($characterName, $isAttacker === 'true');
         return response()->json();
     }
