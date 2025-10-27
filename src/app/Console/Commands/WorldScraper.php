@@ -53,7 +53,7 @@ class WorldScraper extends Command {
         $executionCrawler = new ExecutionCrawler();
         $executionCrawler->guild_name = $searchGuild;
         $executionCrawler->url = $url;
-        $executionCrawler->qtd_characters = $guildPage->characters->count();
+        $executionCrawler->qtd_characters = $guildPage->getOnlineCharacters()+$guildPage->getOfflineCharacters();
         $executionCrawler->qtd_character_online = $guildPage->getOnlineCharacters();
         $executionCrawler->qtd_character_offline = $guildPage->getOfflineCharacters();
         $executionCrawler->execution_time = $executionTime;
