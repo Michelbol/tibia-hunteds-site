@@ -82,3 +82,6 @@ th {
 .context-menu div:hover {
     background-color: #555;
 }
+.attack-character {
+    background-color: #800000;
+}

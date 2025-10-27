@@ -37,6 +37,11 @@ class HomeController extends Controller {
         return response()->json();
     }
 
+    public function setCharacterAsAttacker(string $characterName, bool $isAttacker): JsonResponse {
+        $this->characterService->updateCharacterIsAttacker($characterName, $isAttacker === 'true');
+        return response()->json();
+    }
+
     public function updateCharacterPosition(Request $request, string $characterName): JsonResponse {
         $position = $request->get('position');
         if (is_null($position)) {

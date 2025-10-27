@@ -2,6 +2,7 @@ document.addEventListener("click", (event) => {
     if (event.target.tagName === 'INPUT') {
         return;
     }
+    if (!document.getElementById('input-position')) return;
     document.getElementById('input-position').value = '';
     contextMenu.style.display = "none";
 });
@@ -72,12 +73,16 @@ function addRow(tableId, index, character) {
 
     row.style.cursor = "pointer";
     row.title = `Clique para copiar: exiva "${character.name}"`;
+    if (character.is_attacker_character) {
+        row.className = 'attack-character';
+    }
 
     row.addEventListener("click", () => {
         const text = `exiva "${character.name}"`;
         copyToClipboard(text);
     });
     row.addEventListener("contextmenu", (event) => {
+        if (!contextMenu) return;
         event.preventDefault();
         contextMenuTarget = character;
         contextMenu.style.top = `${event.pageY}px`;
@@ -94,8 +99,15 @@ function changeType(newType) {
     contextMenu.style.display = "none";
 }
 
+function setAsAttacker(isAttacker) {
+    if (!contextMenuTarget) return;
+    setAsAttackerCharacter(contextMenuTarget.name, isAttacker);
+    contextMenu.style.display = "none";
+}
+
 function changePosition() {
     if (!contextMenuTarget) return;
+    if (!document.getElementById('input-position')) return;
     position = document.getElementById('input-position').value;
     setCharacterPosition(contextMenuTarget.name, position);
 }
@@ -105,6 +117,29 @@ async function setCharacterType(characterName, newType) {
         const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
         const response = await fetch(`/set/${characterName}/as/${newType}`, {
 
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': csrfToken
+            },
+            body: JSON.stringify({name: characterName})
+        });
+
+        if (!response.ok) {
+            throw new Error(`Erro ao atualizar personagem: ${response.status}`);
+        }
+
+        console.log(`Personagem ${characterName} atualizado para ${newType}`);
+        fetchOnlineCharacters(); // Atualiza a tabela após sucesso
+    } catch (error) {
+        console.error('Erro ao fazer POST:', error);
+    }
+}
+
+async function setAsAttackerCharacter(characterName, isAttacker) {
+    try {
+        const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+        const response = await fetch(`/set/${characterName}/as/attacker/${isAttacker}`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',

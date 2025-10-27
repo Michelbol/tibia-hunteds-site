@@ -37,4 +37,8 @@ class CharacterRepository {
     public function getAllCharactersByGuildName(?string $guildName): Collection {
         return Character::where('guild_name', $guildName)->get();
     }
+
+    public function updateCharacterIsAttacker(string $characterName, bool $isAttacker): void {
+        Character::where('name', $characterName)->update(['is_attacker_character' => $isAttacker]);
+    }
 }

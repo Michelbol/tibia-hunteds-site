@@ -20,6 +20,10 @@ readonly class CharacterService {
         $this->characterRepository->updateCharacterTypeUsingName($characterName, $type);
     }
 
+    public function updateCharacterIsAttacker(string $characterName, bool $isAttacker): void {
+        $this->characterRepository->updateCharacterIsAttacker($characterName, $isAttacker);
+    }
+
     public function create(string $name, string $vocation, int $level, string $joiningDate, string $guildName): Character {
         $character = new Character();
         $character->name = $name;

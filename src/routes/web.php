@@ -12,6 +12,7 @@ Route::get('/get-online-characters', [HomeController::class, 'getOnlineCharacter
 Route::middleware(['auth'])->group(function () {
     Route::get('/admin', [HomeController::class, 'index'])->name('home');
     Route::post('/set/{characterName}/as/{type}', [HomeController::class, 'setCharacterType']);
+    Route::post('/set/{characterName}/as/attacker/{isAttacker}', [HomeController::class, 'setCharacterAsAttacker']);
     Route::post('/position/{characterName}', [HomeController::class, 'updateCharacterPosition']);
     Route::get('/online-graphics-gant', [HomeController::class, 'getCharactersOnlineGantGraphics'])->name('online-graphics-gant');
 });

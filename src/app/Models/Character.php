@@ -14,6 +14,7 @@ use Illuminate\Database\Eloquent\Model;
  * @property \Illuminate\Support\Carbon $joining_date
  * @property string $type
  * @property boolean $is_online
+ * @property boolean $is_attacker_character
  * @property Carbon $online_at
  * @property string $position
  * @property Carbon $position_time
@@ -24,6 +25,7 @@ class Character extends Model {
     protected $casts = [
         'online_at' => 'datetime',
         'position_time' => 'datetime',
+        'is_attacker_character' => 'boolean',
     ];
 
     public function toArray(): array {
@@ -36,6 +38,7 @@ class Character extends Model {
             'online_at' => $this->online_at ? $this->online_at->timezone('America/Sao_Paulo')->format('Y-m-d H:i:s') : null,
             'position_time' => $this->position_time ? $this->position_time->timezone('America/Sao_Paulo')->format('Y-m-d H:i:s') : null,
             'position' => $this->position,
+            'is_attacker_character' => $this->is_attacker_character,
         ];
     }
 }
