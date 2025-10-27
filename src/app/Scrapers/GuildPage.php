@@ -5,6 +5,7 @@ namespace App\Scrapers;
 use App\Character\CharacterService;
 use App\Character\StatusEnum;
 use App\Character\VocationEnum;
+use App\Models\Character;
 use App\Scrapers\Exceptions\NotFoundStatusInPage;
 use Carbon\Carbon;
 use Illuminate\Support\Collection;
@@ -13,27 +14,22 @@ use Illuminate\Support\Str;
 use PHPHtmlParser\Dom;
 
 class GuildPage {
-    public Collection $characters;
-    public Collection $onlineCharacters;
-    public Collection $offlineCharacters;
+    public Collection $onlineDatabaseCharacters;
+    public Collection $offlineDatabaseCharacters;
     public function __construct(private CharacterService $characterService,) {
-        $this->characters = collect();
-        $this->onlineCharacters = collect();
-        $this->offlineCharacters = collect();
+        $this->onlineDatabaseCharacters = collect();
+        $this->offlineDatabaseCharacters = collect();
     }
 
     public function scrap(string $html, ?string $guildName = ''): self {
         $dom = new Dom();
         $dom->load($html);
-        $ssHour = $this->getServerSaveHour();
-        if (Carbon::now()->isBetween($ssHour, $ssHour->copy()->addMinutes(10))) {
-            $this->characterService->setAllCharactersAsOffline();
-        }
+        $guildCharacters = $this->characterService->getAllCharactersByGuildName($guildName);
 
         $htmlCharacters = $dom->find('#guilds .TableContainer .TableContent tr');
         unset($htmlCharacters[0]);
         unset($htmlCharacters[count($htmlCharacters)]);
-        $htmlCharacters->each(function (Dom\HtmlNode $htmlCharacter) use ($guildName) {
+        $htmlCharacters->each(function (Dom\HtmlNode $htmlCharacter) use ($guildName, $guildCharacters) {
             $trAttributes = $htmlCharacter->getAttributes();
             $isInvitationBoard = $htmlCharacter->find('.DoNotBreak');
             if ($isInvitationBoard->count() > 0 || (isset($trAttributes['class']) && $trAttributes['class'] === 'LabelH')) {
@@ -42,13 +38,14 @@ class GuildPage {
             $cells = $htmlCharacter->find('td');
             try {
                 $characterArray = $this->getCharacterFromTd($cells, $guildName);
+                $databaseCharacter = $guildCharacters->first(function (Character $character) use ($characterArray) {
+                    return $character->name === $characterArray['name'];
+                });
                 if ($characterArray['is_online']) {
-                    $this->onlineCharacters->push($characterArray);
-                    $this->characters->push($characterArray);
+                    $this->onlineDatabaseCharacters->push($databaseCharacter);
                     return;
                 }
-                $this->offlineCharacters->push($characterArray);
-                $this->characters->push($characterArray);
+                $this->offlineDatabaseCharacters->push($databaseCharacter);
             } catch (NotFoundStatusInPage $e) {
                 Log::info('[Status Not Found Begin]');
                 Log::info($e->getHtmlNode()->getAttributes());
@@ -58,9 +55,21 @@ class GuildPage {
             }
         });
 
-        $this->characterService->upsert($this->characters);
-        $this->characterService->updateAllOfflines();
-        $this->characterService->updateAllOnline();
+        Character
+            ::whereIn('id', $this->onlineDatabaseCharacters->pluck('id'))
+            ->where('online_at', null)
+            ->where('is_online', false)
+        ->update([
+            'is_online' => true,
+            'online_at' => now(),
+            'position' => null,
+            'position_time' => null,
+        ]);
+        Character::whereNotIn('id', $this->onlineDatabaseCharacters->pluck('id'))->update([
+            'is_online' => false,
+            'online_at' => null,
+            'position' => null,
+            'position_time' => null,]);
         return $this;
     }
 
@@ -77,11 +86,11 @@ class GuildPage {
     }
 
     public function getOnlineCharacters(): int {
-        return $this->onlineCharacters->count();
+        return $this->onlineDatabaseCharacters->count();
     }
 
     public function getOfflineCharacters(): int {
-        return $this->offlineCharacters->count();
+        return $this->offlineDatabaseCharacters->count();
     }
 
     private function getName(Dom\HtmlNode $cells): string {
@@ -98,9 +107,5 @@ class GuildPage {
             'is_online' => $this->getStatus($cells[5]->innerHtml()) === StatusEnum::ONLINE->value,
             'guild_name' => $guildName
         ];
-    }
-
-    private function getServerSaveHour(): Carbon {
-        return Carbon::now()->timezone('America/Sao_paulo')->startOfDay()->addHours(5);
     }
 }

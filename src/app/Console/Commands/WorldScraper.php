@@ -6,13 +6,16 @@ use App\Models\ExecutionCrawler;
 use App\Scrapers\GuildPage;
 use Carbon\Carbon;
 use Illuminate\Console\Command;
+use Illuminate\Support\Facades\Log;
 use Spatie\Browsershot\Browsershot;
 
 class WorldScraper extends Command {
 
-    protected $signature = 'world-scraper {guild?}';
-
+    protected $signature = 'world-scraper {guild?} {debuggerMode?}';
     protected $description = 'Guild Page Scraper';
+    private ?string $guild;
+    private float $requestTime;
+    private float $scrapTime;
 
     private const GUILDS_NAME = [
         [
@@ -28,43 +31,25 @@ class WorldScraper extends Command {
     public function handle(): void {
         try {
             $globalExecutionBegin = microtime(true);
-            $guild = $this->argument('guild');
-            if ($guild === self::GUILDS_NAME[0]['id']) {
-                $searchGuild = self::GUILDS_NAME[0]['name'];
-            } else {
-                $searchGuild = self::GUILDS_NAME[1]['name'];
-            }
+
+            $searchGuild = $this->resolveGuildToSearch();
             $timestamp = Carbon::now()->timestamp;
             $url = "https://www.tibia.com/community/?subtopic=guilds&page=view&GuildName=$searchGuild&timestamp=$timestamp" . random_int(100, 200);
-            $requestTimeBegin = microtime(true);
-            $html = Browsershot::url($url)
-                ->setChromePath(env('PUPPETEER_EXECUTABLE_PATH', '/usr/bin/google-chrome'))
-                ->noSandbox()
-                ->userAgent('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115 Safari/537.36')
-                ->waitUntilNetworkIdle()
-                ->bodyHtml();
-            $requestTimeEnd = microtime(true);
-
-            $scrapingTimeBegin = microtime(true);
-            $guildPage = app(GuildPage::class);
-            $guildPage->scrap($html, $searchGuild);
-            $scrapingTimeEnd = microtime(true);
+            $html = $this->dispatchRequest($url);
+            $guildPage = $this->scrapPage($html, $searchGuild);
 
             $globalExecutionEnd = microtime(true);
             $executionTime = $globalExecutionEnd - $globalExecutionBegin;
-            $scrapingTime = $scrapingTimeEnd - $scrapingTimeBegin;
-            $requestTime = $requestTimeEnd - $requestTimeBegin;
-            $this->createExecutionCrawler($searchGuild, $url, $guildPage, $executionTime, $scrapingTime, $requestTime);
-
+            $this->createExecutionCrawler($searchGuild, $url, $guildPage, $executionTime);
 
             $this->info('Guild Page Scraped Summary');
             $this->info('Total Characters: '. $guildPage->characters->count());
         } catch (\Exception $e) {
-            $this->info($e->getMessage());
+            Log::info($e->getMessage());
         }
     }
 
-    private function createExecutionCrawler(string $searchGuild, string $url, GuildPage $guildPage, float $executionTime, float $scrapingTime, float $requestTime): void {
+    private function createExecutionCrawler(string $searchGuild, string $url, GuildPage $guildPage, float $executionTime): void {
         $executionCrawler = new ExecutionCrawler();
         $executionCrawler->guild_name = $searchGuild;
         $executionCrawler->url = $url;
@@ -72,8 +57,38 @@ class WorldScraper extends Command {
         $executionCrawler->qtd_character_online = $guildPage->getOnlineCharacters();
         $executionCrawler->qtd_character_offline = $guildPage->getOfflineCharacters();
         $executionCrawler->execution_time = $executionTime;
-        $executionCrawler->scraping_time = $scrapingTime;
-        $executionCrawler->request_time = $requestTime;
+        $executionCrawler->scraping_time = $this->scrapTime;
+        $executionCrawler->request_time = $this->requestTime;
         $executionCrawler->save();
+    }
+
+    private function dispatchRequest(string $url): string {
+        $requestTimeBegin = microtime(true);
+        $html = Browsershot::url($url)
+            ->setChromePath(env('PUPPETEER_EXECUTABLE_PATH', '/usr/bin/google-chrome'))
+            ->noSandbox()
+            ->userAgent('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115 Safari/537.36')
+            ->waitUntilNetworkIdle()
+            ->bodyHtml();
+        $requestTimeEnd = microtime(true);
+        $this->requestTime = $requestTimeEnd - $requestTimeBegin;
+        return $html;
+    }
+
+    private function scrapPage(string $html, string $searchGuild): GuildPage {
+        $scrapingTimeBegin = microtime(true);
+        $guildPage = app(GuildPage::class);
+        $guildPage->scrap($html, $searchGuild);
+        $scrapingTimeEnd = microtime(true);
+        $this->scrapTime = $scrapingTimeEnd - $scrapingTimeBegin;
+        return $guildPage;
+    }
+
+    private function resolveGuildToSearch(): string {
+        $this->guild = $this->argument('guild');
+        if ($this->guild === self::GUILDS_NAME[0]['id']) {
+            return self::GUILDS_NAME[0]['name'];
+        }
+        return self::GUILDS_NAME[1]['name'];
     }
 }

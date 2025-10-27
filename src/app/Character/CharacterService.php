@@ -63,15 +63,7 @@ readonly class CharacterService {
         $this->characterRepository->upsertCharacters($characters);
     }
 
-    public function updateAllOfflines(): void {
-        $this->characterRepository->updateAllOfflineAsOnlineAtNull();
-    }
-
-    public function updateAllOnline(): void {
-        $this->characterRepository->updateSetOnlineAtNowForAllOnlinePlayersWithoutOnlineAt();
-    }
-
-    public function setAllCharactersAsOffline(): void {
-        $this->characterRepository->updateAllCharactersAsOffline();
+    public function getAllCharactersByGuildName(?string $guildName): Collection {
+        return $this->characterRepository->getAllCharactersByGuildName($guildName);
     }
 }
