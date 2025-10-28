@@ -56,8 +56,8 @@ class WorldScraper extends Command {
             if (is_null($url)) {
                 $searchGuild = 'Url didnt exists';
             }
-            if (!is_null($guildPage)) {
-                $qtdTotal = $guildPage->getOnlineCharacters()+$guildPage->getOfflineCharacters()
+            if (!isset($guildPage)) {
+                $qtdTotal = $guildPage->getOnlineCharacters()+$guildPage->getOfflineCharacters();
                 $qtdOnline = $guildPage->getOnlineCharacters();
                 $qtdOffline = $guildPage->getOfflineCharacters();
             }
