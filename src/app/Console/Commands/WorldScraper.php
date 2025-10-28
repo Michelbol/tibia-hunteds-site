@@ -61,13 +61,13 @@ class WorldScraper extends Command {
                 $qtdOnline = $guildPage->getOnlineCharacters();
                 $qtdOffline = $guildPage->getOfflineCharacters();
             }
-            if (is_null($globalExecutionBegin)) {
+            if (!isset($globalExecutionBegin)) {
                 $globalExecutionBegin = microtime(true);
             }
-            if (is_null($globalExecutionEnd)) {
+            if (!isset($globalExecutionEnd)) {
                 $globalExecutionEnd = microtime(true);
             }
-            if (is_null($executionTime)) {
+            if (!isset($executionTime)) {
                 $executionTime = $globalExecutionEnd - $globalExecutionBegin;
             }
             $this->createExecutionCrawler($searchGuild, $url, $qtdTotal, $qtdOnline, $qtdOffline, $executionTime);
