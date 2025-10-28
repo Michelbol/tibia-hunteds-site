@@ -7,7 +7,7 @@ use App\Scrapers\GuildPage;
 use Carbon\Carbon;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Log;
-use Spatie\Browsershot\Browsershot;
+use \Spatie\Browsershot\Browsershot;
 
 class WorldScraper extends Command {
 
@@ -109,7 +109,7 @@ class WorldScraper extends Command {
             ->noSandbox()
             ->userAgent('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115 Safari/537.36')
             ->waitUntilNetworkIdle()
-            ->timeout(5)
+            ->timeout(10)
             ->bodyHtml();
         $requestTimeEnd = microtime(true);
         $this->requestTime = $requestTimeEnd - $requestTimeBegin;
