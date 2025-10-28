@@ -12,6 +12,15 @@
 <div id="lastUpdate">Atualizado agora</div>
 <div>
     <input readonly disabled name="guild_name" id="guild-name" value="{{ $guilds[0]['name'] }}">
+    <select id="soundSelect" onchange="playSelectedSound()">
+        <option>Sem Som</option>
+        <option selected value="logaram_bombas.mp3">Logaram bombas 1</option>
+        <option value="logaram_bombas_voz_grossa.mp3">Logaram bombas 2</option>
+        <option value="logaram_bombas_veia.mp3">Logaram bombas veia</option>
+        <option value="lombraram gombas.mp3">Lombraram Gombas</option>
+        <option value="roubaram_bombas.mp3">Roubaram bombas</option>
+        <option value="guild.mp3">Guild Detectado</option>
+    </select>
 </div>
 
 <div class="tables-container">
