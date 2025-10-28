@@ -80,6 +80,7 @@ function addRow(tableId, index, character) {
     row.addEventListener("click", () => {
         const text = `exiva "${character.name}"`;
         copyToClipboard(text);
+        showCopyToast(`Copiado: ${text}`);
     });
     row.addEventListener("contextmenu", (event) => {
         if (!contextMenu) return;
@@ -236,6 +237,28 @@ function copySio() {
     copyToClipboard(`exura sio "${characterName}"`)
 }
 
+function getToastElement() {
+    let el = document.getElementById('copyToast');
+    if (!el) {
+        el = document.createElement('div');
+        el.id = 'copyToast';
+        el.className = 'copy-toast';
+        document.body.appendChild(el);
+    }
+    return el;
+}
+
+function showCopyToast(message, duration = 2000) {
+    const el = getToastElement();
+    el.textContent = message;
+    void el.offsetWidth;
+    el.classList.add('show');
+
+    clearTimeout(el._hideTimeout);
+    el._hideTimeout = setTimeout(() => {
+        el.classList.remove('show');
+    }, duration);
+}
 setInterval(updateCreatedAtTimers, 1000);
 setInterval(updatePositionTimeTimers, 1000);
 fetchOnlineCharacters();

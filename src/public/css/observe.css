@@ -85,3 +85,23 @@ th {
 .attack-character {
     background-color: #19760f;
 }
+
+.copy-toast {
+    position: fixed;
+    top: 16px;
+    right: 16px;
+    background: rgba(50,50,50,0.95);
+    color: #fff;
+    padding: 8px 12px;
+    border-radius: 8px;
+    box-shadow: 0 6px 18px rgba(0,0,0,0.45);
+    font-size: 14px;
+    z-index: 9999;
+    opacity: 0;
+    transform: translateY(-6px);
+    transition: opacity .18s ease, transform .18s ease;
+}
+.copy-toast.show {
+    opacity: 1;
+    transform: translateY(0);
+}
