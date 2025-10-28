@@ -19,7 +19,6 @@
         <option value="logaram_bombas_veia.mp3">Logaram bombas veia</option>
         <option value="lombraram gombas.mp3">Lombraram Gombas</option>
         <option value="roubaram_bombas.mp3">Roubaram bombas</option>
-        <option value="guild.mp3">Guild Detectado</option>
     </select>
 </div>
 
