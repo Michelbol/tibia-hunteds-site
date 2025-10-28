@@ -70,11 +70,26 @@ class WorldScraper extends Command {
             if (!isset($executionTime)) {
                 $executionTime = $globalExecutionEnd - $globalExecutionBegin;
             }
-            $this->createExecutionCrawler($searchGuild, $url, $qtdTotal, $qtdOnline, $qtdOffline, $executionTime);
+            if (!isset($this->scrapTime)) {
+                $this->scrapTime = 0;
+            }
+            if (!isset($this->requestTime)) {
+                $this->requestTime = 0;
+            }
+            $this->createExecutionCrawler($searchGuild, $url, $qtdTotal, $qtdOnline, $qtdOffline, $executionTime, $this->scrapTime, $this->requestTime);
         }
     }
 
-    private function createExecutionCrawler(string $searchGuild, string $url, int $qtdTtalCharacters, int $qtdOnline, int $qtdOffline, float $executionTime): void {
+    private function createExecutionCrawler(
+        string $searchGuild,
+        string $url,
+        int $qtdTtalCharacters,
+        int $qtdOnline,
+        int $qtdOffline,
+        float $executionTime,
+        float $scrapTime,
+        float $requestTime
+    ): void {
         $executionCrawler = new ExecutionCrawler();
         $executionCrawler->guild_name = $searchGuild;
         $executionCrawler->url = $url;
@@ -82,8 +97,8 @@ class WorldScraper extends Command {
         $executionCrawler->qtd_character_online = $qtdOnline;
         $executionCrawler->qtd_character_offline = $qtdOffline;
         $executionCrawler->execution_time = $executionTime;
-        $executionCrawler->scraping_time = $this->scrapTime;
-        $executionCrawler->request_time = $this->requestTime;
+        $executionCrawler->scraping_time = $scrapTime;
+        $executionCrawler->request_time = $requestTime;
         $executionCrawler->save();
     }
 
