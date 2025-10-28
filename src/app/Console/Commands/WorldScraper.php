@@ -45,6 +45,7 @@ class WorldScraper extends Command {
             $this->info('Guild Page Scraped Summary'.$timestamp);
             $this->info('Total Characters: '. $guildPage->getOnlineCharacters()+$guildPage->getOfflineCharacters());
         } catch (\Exception $e) {
+            $this->info('Error to execute'.Carbon::now()->timestamp);
             Log::info($e->getMessage());
         }
     }
