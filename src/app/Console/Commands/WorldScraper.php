@@ -42,10 +42,10 @@ class WorldScraper extends Command {
             $executionTime = $globalExecutionEnd - $globalExecutionBegin;
             $this->createExecutionCrawler($searchGuild, $url, $guildPage, $executionTime);
 
-            $this->info('Guild Page Scraped Summary'.$timestamp);
+            $this->info('Guild Page Scraped Summary: '.Carbon::now()->toDateTimeString());
             $this->info('Total Characters: '. $guildPage->getOnlineCharacters()+$guildPage->getOfflineCharacters());
         } catch (\Exception $e) {
-            $this->info('Error to execute'.Carbon::now()->timestamp);
+            $this->info('Error to execute: '.Carbon::now()->toDateTimeString());
             Log::info($e->getMessage());
         }
     }
