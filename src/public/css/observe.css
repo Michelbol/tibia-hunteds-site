@@ -89,7 +89,7 @@ th {
 .copy-toast {
     position: fixed;
     top: 16px;
-    right: 16px;
+    right: 50%;
     background: rgba(50,50,50,0.95);
     color: #fff;
     padding: 8px 12px;
