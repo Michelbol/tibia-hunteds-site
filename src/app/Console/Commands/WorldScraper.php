@@ -43,7 +43,7 @@ class WorldScraper extends Command {
             $this->createExecutionCrawler($searchGuild, $url, $guildPage, $executionTime);
 
             $this->info('Guild Page Scraped Summary');
-            $this->info('Total Characters: '. $guildPage->characters->count());
+            $this->info('Total Characters: '. $guildPage->getOnlineCharacters()+$guildPage->getOfflineCharacters());
         } catch (\Exception $e) {
             Log::info($e->getMessage());
         }
