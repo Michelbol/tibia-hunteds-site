@@ -12,7 +12,7 @@ jobs:
       - uses: actions/checkout@v3
 
       - name: Create .env
-        run: cp src/.env.testing infra/.env
+        run: cp src/.env.testing infra/scheduler/.env
 
       # Sobe os containers com o app e nginx
       - name: Build and start containers
@@ -38,4 +38,4 @@ jobs:
         run: docker compose -f infra/scheduler/docker-compose.yml exec -T scheduler php artisan db:seed
 
       - name: Run Tests with PHPUnit + Xdebug
-        run: docker compose -f infra/docker-compose.yml exec -T scheduler vendor/bin/phpunit --coverage-text --colors=never
+        run: docker compose -f infra/scheduler/docker-compose.yml exec -T scheduler vendor/bin/phpunit --coverage-text --colors=never
