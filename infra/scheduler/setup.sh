@@ -16,7 +16,7 @@ sudo php /tmp/composer-setup.php --install-dir=/usr/local/bin --filename=compose
 
 # install node
 sudo apt install nodejs npm -y
-curl -fsSL https://deb.nodesource.com/setup_XX.x | sudo -E bash -
+curl -fsSL https://deb.nodesource.com/setup_22.x | sudo -E bash -
 sudo apt install nodejs -y
 
 #install google chrome
