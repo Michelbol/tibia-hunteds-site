@@ -16,7 +16,7 @@ jobs:
 
       # Sobe os containers com o app e nginx
       - name: Build and start containers
-        run: docker compose -f docker-compose.dev.yml up -d
+        run: docker compose -f infra/docker-compose.dev.yml up -d
 
       # Instala dependências via composer dentro do container
       - name: Install Dependencies
