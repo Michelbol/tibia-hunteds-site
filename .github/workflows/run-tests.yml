@@ -16,26 +16,26 @@ jobs:
 
       # Sobe os containers com o app e nginx
       - name: Build and start containers
-        run: docker compose -f infra/docker-compose.dev.yml up -d
+        run: docker compose -f infra/scheduler/docker-compose.yml up -d
 
       # Instala dependências via composer dentro do container
       - name: Install Dependencies
-        run: docker compose -f infra/scheduler/docker-compose.dev.yml exec -T app composer install -q --no-ansi --no-interaction --no-scripts --no-progress --prefer-dist
+        run: docker compose -f infra/scheduler/docker-compose.yml exec -T scheduler composer install -q --no-ansi --no-interaction --no-scripts --no-progress --prefer-dist
 
       - name: Directory Permissions
-        run: docker compose -f infra/scheduler/docker-compose.dev.yml exec -T app chmod -R 777 storage bootstrap/cache
+        run: docker compose -f infra/scheduler/docker-compose.yml exec -T scheduler chmod -R 777 storage bootstrap/cache
 
       - name: Create SqlLite database
-        run: docker compose -f infra/scheduler/docker-compose.dev.yml exec -T app touch database/database.sqlite
+        run: docker compose -f infra/scheduler/docker-compose.yml exec -T scheduler touch database/database.sqlite
 
       - name: Generate App key
-        run: docker compose -f infra/scheduler/docker-compose.dev.yml exec -T app php artisan key:generate
+        run: docker compose -f infra/scheduler/docker-compose.yml exec -T scheduler php artisan key:generate
 
       - name: Run Migrations
-        run: docker compose -f infra/scheduler/docker-compose.dev.yml exec -T app php artisan migrate --force
+        run: docker compose -f infra/scheduler/docker-compose.yml exec -T scheduler php artisan migrate --force
 
       - name: Run Seeders
-        run: docker compose -f infra/scheduler/docker-compose.dev.yml exec -T app php artisan db:seed
+        run: docker compose -f infra/scheduler/docker-compose.yml exec -T scheduler php artisan db:seed
 
       - name: Run Tests with PHPUnit + Xdebug
-        run: docker compose -f infra/docker-compose.dev.yml exec -T app vendor/bin/phpunit --coverage-text --colors=never
+        run: docker compose -f infra/docker-compose.yml exec -T scheduler vendor/bin/phpunit --coverage-text --colors=never
