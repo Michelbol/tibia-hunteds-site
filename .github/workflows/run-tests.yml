@@ -38,4 +38,4 @@ jobs:
         run: docker compose -f infra/scheduler/docker-compose.yml exec -T scheduler php artisan db:seed
 
       - name: Run Tests with PHPUnit + Xdebug
-        run: docker compose -f infra/scheduler/docker-compose.yml exec -T scheduler vendor/bin/phpunit --coverage-text --colors=never
+        run: docker compose -f infra/scheduler/docker-compose.yml exec -T scheduler vendor/bin/phpunit --colors=never
