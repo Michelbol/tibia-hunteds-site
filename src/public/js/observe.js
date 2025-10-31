@@ -54,19 +54,42 @@ function clearTables() {
     document.querySelector('#makersTable tbody').innerHTML = '';
 }
 
+
+function renderVocationImg(vocation) {
+    switch (vocation) {
+        case 'Master Sorcerer':
+        case 'Sorcerer':
+            return `<img class="vocation-icon" src="img/Sudden_Death_Rune.gif" alt="Master Sorcerer">`
+        case 'Elder Druid':
+        case 'Druid':
+            return `<img class="vocation-icon" src="img/Paralyse_Rune.gif" alt="Elder Druid">`
+        case 'Elite Knight':
+        case 'Knight':
+            return `<img class="vocation-icon" src="img/Dagger.gif" alt="Elite Knight">`
+        case 'Paladin':
+        case 'Royal Paladin':
+            return `<img class="vocation-icon" src="img/Guardcatcher.gif" alt="Royal Paladin">`
+        case 'Monk':
+        case 'Exalted Monk':
+            return `<img class="vocation-icon" src="img/Fists_of_Enlightenment.gif" alt="Exalted Monk">`
+    }
+}
+
 function addRow(tableId, index, character) {
     const tbody = document.querySelector(`#${tableId} tbody`);
     const row = document.createElement('tr');
+    row.className = 'vocation-tr';
     const createdAtDate = new Date(character.online_at);
     const positionAtDate = character.position_time !== null ? new Date(character.position_time) : null;
     createdAtMap.set(`created-at-${tableId}-${index}`, createdAtDate);
     positionTimeMap.set(`position-time-${tableId}-${index}`, positionAtDate);
 
+    const imgVocation = renderVocationImg(character.vocation);
     row.innerHTML = `
         <td>#${index + 1}</td>
         <td>${character.name}</td>
         <td>${character.level}</td>
-        <td>${character.vocation}</td>
+        <td>${imgVocation}<span class="vocation-text">${character.vocation}</span></td>
         <td id="created-at-${tableId}-${index}" class="normal">00:00:00</td>
         <td id="position-time-${tableId}-${index}" class="normal"></td>
         <td id="position" class="normal">${character.position ?? ''}</td>
@@ -237,6 +260,7 @@ async function fetchOnlineCharacters() {
 
         updateCreatedAtTimers();
         updatePositionTimeTimers();
+        document.title = sortedCharacters.length + ' Characters Online';
     } catch (error) {
         console.error('Erro ao buscar personagens:', error);
     }

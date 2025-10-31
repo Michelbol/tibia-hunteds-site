@@ -105,3 +105,22 @@ th {
     opacity: 1;
     transform: translateY(0);
 }
+
+.vocation-cell {
+    display: flex;
+    align-items: center;   /* centra verticalmente */
+    gap: 8px;              /* espaçamento entre ícone e texto */
+    white-space: nowrap;   /* evita quebra indesejada */
+    padding: 6px 8px;
+}
+
+.vocation-icon {
+    width: 18px;           /* ajuste o tamanho do ícone aqui */
+    height: 18px;
+    flex: 0 0 18px;        /* não deixa o ícone encolher/expandir */
+    display: inline-block;
+    vertical-align: middle;
+}
+.vocation-text {
+    line-height: 1;        /* evita desalinhamento em fontes grandes */
+}
