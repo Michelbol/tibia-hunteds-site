@@ -3,14 +3,11 @@
 namespace App\Scrapers;
 
 use App\Character\CharacterService;
-use App\Character\StatusEnum;
-use App\Character\VocationEnum;
+use App\Character\GuildPageCharacter;
 use App\Models\Character;
 use App\Scrapers\Exceptions\NotFoundStatusInPage;
-use Carbon\Carbon;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Str;
 use PHPHtmlParser\Dom;
 
 class GuildPage {
@@ -37,11 +34,11 @@ class GuildPage {
             }
             $cells = $htmlCharacter->find('td');
             try {
-                $characterArray = $this->getCharacterFromTd($cells, $guildName);
-                $databaseCharacter = $guildCharacters->first(function (Character $character) use ($characterArray) {
-                    return $character->name === $characterArray['name'];
+                $guildPageCharacter = GuildPageCharacter::buildFromGuildPageCell($cells, $guildName);
+                $databaseCharacter = $guildCharacters->first(function (Character $character) use ($guildPageCharacter) {
+                    return $character->name === $guildPageCharacter->name;
                 });
-                if ($characterArray['is_online']) {
+                if ($guildPageCharacter->is_online) {
                     $this->onlineDatabaseCharacters->push($databaseCharacter);
                     return;
                 }
@@ -55,8 +52,9 @@ class GuildPage {
             }
         });
 
+        $onlineCharactersId = $this->onlineDatabaseCharacters->pluck('id');
         Character
-            ::whereIn('id', $this->onlineDatabaseCharacters->pluck('id'))
+            ::whereIn('id', $onlineCharactersId)
             ->where('online_at', null)
             ->where('is_online', false)
         ->update([
@@ -65,7 +63,7 @@ class GuildPage {
             'position' => null,
             'position_time' => null,
         ]);
-        Character::whereNotIn('id', $this->onlineDatabaseCharacters->pluck('id'))->update([
+        Character::whereNotIn('id', $onlineCharactersId)->update([
             'is_online' => false,
             'online_at' => null,
             'position' => null,
@@ -78,39 +76,11 @@ class GuildPage {
         return $this;
     }
 
-    private function removeSpace(string $word): string {
-        return Str::replace('&nbsp;', ' ', $word);
-    }
-
-    private function getStatus(string $status): string {
-        $status = Str::replace('<span class="green">', '', $status);
-        $status = Str::replace('<span class="red">', '', $status);
-        $status = Str::replace('</span>', '', $status);
-        $status = Str::replace('<b>', '', $status);
-        return Str::replace('</b>', '', $status);
-    }
-
     public function getOnlineCharacters(): int {
         return $this->onlineDatabaseCharacters->count();
     }
 
     public function getOfflineCharacters(): int {
         return $this->offlineDatabaseCharacters->count();
-    }
-
-    private function getName(Dom\HtmlNode $cells): string {
-        $name = $cells->find('a')->innerHtml();
-        return $this->removeSpace($name);
-    }
-
-    private function getCharacterFromTd(Dom\Collection $cells, ?string $guildName): array {
-        return [
-            'name' => $this->getName($cells[1]),
-            'vocation' => VocationEnum::from($cells[2]->innerHtml()),
-            'level' => $cells[3]->innerHtml(),
-            'joining_date' => Carbon::createFromFormat('M d Y', $this->removeSpace($cells[4]->innerHtml())),
-            'is_online' => $this->getStatus($cells[5]->innerHtml()) === StatusEnum::ONLINE->value,
-            'guild_name' => $guildName
-        ];
     }
 }

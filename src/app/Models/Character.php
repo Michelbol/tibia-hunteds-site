@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Carbon\Carbon;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 /**
@@ -21,11 +22,13 @@ use Illuminate\Database\Eloquent\Model;
  * @property Carbon $created_at
  */
 class Character extends Model {
+    use HasFactory;
 
     protected $casts = [
         'online_at' => 'datetime',
         'position_time' => 'datetime',
         'is_attacker_character' => 'boolean',
+        'is_online' => 'boolean',
     ];
 
     public function toArray(): array {
@@ -35,6 +38,7 @@ class Character extends Model {
             'level' => $this->level,
             'joining_date' => $this->joining_date,
             'type' => $this->type,
+            'is_online' => $this->is_online,
             'online_at' => $this->online_at ? $this->online_at->timezone('America/Sao_Paulo')->format('Y-m-d H:i:s') : null,
             'position_time' => $this->position_time ? $this->position_time->timezone('America/Sao_Paulo')->format('Y-m-d H:i:s') : null,
             'position' => $this->position,
