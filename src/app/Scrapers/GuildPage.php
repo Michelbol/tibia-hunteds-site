@@ -70,6 +70,11 @@ class GuildPage {
             'online_at' => null,
             'position' => null,
             'position_time' => null,]);
+        Character::whereIn('id', $this->offlineDatabaseCharacters->pluck('id'))->update([
+            'is_online' => false,
+            'online_at' => null,
+            'position' => null,
+            'position_time' => null,]);
         return $this;
     }
 
