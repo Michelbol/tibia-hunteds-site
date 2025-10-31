@@ -19,6 +19,11 @@
         <option value="logaram_bombas_veia.mp3">Logaram bombas veia</option>
         <option value="lombraram gombas.mp3">Lombraram Gombas</option>
         <option value="roubaram_bombas.mp3">Roubaram bombas</option>
+        <option value="Ivaudio1.mp3">Ivaudio 1</option>
+        <option value="Ivaudio2.mp3">Ivaudio 2</option>
+        <option value="Ivaudio3.m4a">Ivaudio 3</option>
+        <option value="Ivaudio4.mp3">Ivaudio 4</option>
+        <option value="Ivaudio5.mp3">Ivaudio 5</option>
     </select>
 </div>
 
