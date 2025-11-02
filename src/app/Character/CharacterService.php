@@ -24,15 +24,17 @@ readonly class CharacterService {
         $this->characterRepository->updateCharacterIsAttacker($characterName, $isAttacker);
     }
 
-    public function create(string $name, string $vocation, int $level, string $joiningDate, string $guildName): Character {
+    public function createByGuildPageCharacter(GuildPageCharacter $guildPageCharacter, string $guildName): Character {
         $character = new Character();
-        $character->name = $name;
-        $character->vocation = VocationEnum::from($vocation);
-        $character->level = $level;
-        $character->joining_date = Carbon::createFromFormat('M d Y', $joiningDate);
-        $character->is_online = false;
+        $character->name = $guildPageCharacter->name;
+        $character->vocation = $guildPageCharacter->vocation;
+        $character->level = $guildPageCharacter->level;
+        $character->joining_date = $guildPageCharacter->joining_date;
+        $character->is_online = $guildPageCharacter->is_online;
         $character->guild_name = $guildName;
-        $character->online_at = null;
+        $character->online_at = now();
+        $character->position = null;
+        $character->position_time = null;
         $character->save();
 
         return $character;

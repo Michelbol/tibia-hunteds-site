@@ -39,6 +39,9 @@ class GuildPage {
                     return $character->name === $guildPageCharacter->name;
                 });
                 if ($guildPageCharacter->is_online) {
+                    if ($databaseCharacter === null) {
+                        $this->characterService->createByGuildPageCharacter($guildPageCharacter, $guildName);
+                    }
                     $this->onlineDatabaseCharacters->push($databaseCharacter);
                     return;
                 }
