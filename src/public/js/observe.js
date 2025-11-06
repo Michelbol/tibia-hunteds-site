@@ -33,7 +33,7 @@ function formatTimestampToTimer(time, id) {
         return;
     }
     const now = new Date();
-    const diffInSec = Math.floor((now - time) / 1000);
+    const diffInSec = Math.max(0, Math.floor((now - time) / 1000));
     const cell = document.getElementById(id);
     if (cell) {
         cell.textContent = formatToHHMMSS(diffInSec);
