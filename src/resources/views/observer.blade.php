@@ -117,6 +117,6 @@
     </div>
 </div>
 
-<script src="{{ asset('js/observe.js') }}"></script>
+<script src="{{ asset('js/observe.js?v=202511081442') }}"></script>
 </body>
 </html>

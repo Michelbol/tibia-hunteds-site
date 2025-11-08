@@ -12,6 +12,7 @@ const contextMenu = document.getElementById('contextMenu');
 let createdAtMap = new Map();
 let positionTimeMap = new Map();
 let lastPlayed = new Date();
+let lastOnlineCount = 0;
 
 function formatToHHMMSS(seconds) {
     const h = String(Math.floor(seconds / 3600)).padStart(2, '0');
@@ -222,6 +223,27 @@ async function fetchOnlineCharacters() {
         const response = await fetch('/get-online-characters?guild_name='+guildName);
         const data = await response.json();
 
+        const charactersOnlineAtMinusThanOneMinute = data.onlineCharacters.filter(character => {
+            const now = new Date();
+            const createdAtDate = new Date(character.online_at);
+            const diffInSec = Math.floor((now - createdAtDate) / 1000);
+            if (diffInSec < 60) {
+                return character;
+            }
+        });
+        const prevBlocks = Math.floor(lastOnlineCount / 5);
+        const currentBlocks = Math.floor(charactersOnlineAtMinusThanOneMinute.length / 5);
+
+        if (currentBlocks > prevBlocks) {
+            const timesToPlay = currentBlocks - prevBlocks;
+            for (let i = 0; i < timesToPlay; i++) {
+                setTimeout(() => {
+                    playSelectedSound();
+                }, i * 500)
+            }
+        }
+
+        lastOnlineCount = charactersOnlineAtMinusThanOneMinute.length;
         clearTables();
         createdAtMap.clear();
         positionTimeMap.clear();
@@ -231,15 +253,6 @@ async function fetchOnlineCharacters() {
             const timeB = new Date() - new Date(b.online_at);
             return timeA - timeB; // ordem crescente: menor tempo online primeiro
         });
-        const charactersOnlineAtMinusThanOneMinute = data.onlineCharacters.filter(character => {
-            const now = new Date();
-            const createdAtDate = new Date(character.online_at);
-            const diffInSec = Math.floor((now - createdAtDate) / 1000);
-            if (diffInSec < 60) {
-                return character;
-            }
-        });
-        playAudioIfNeeded(charactersOnlineAtMinusThanOneMinute);
 
         let mainIndex = 0, bombaIndex = 0, bombaoIndex = 0, makerIndex = 0;
 
@@ -304,17 +317,6 @@ function playSelectedSound() {
     const audio = new Audio(SOUND_PATH + value);
     audio.play().catch(err => console.error('Erro ao tocar som:', err));
     lastPlayed = new Date();
-}
-
-function playAudioIfNeeded(charactersOnlineAtMinusThanOneMinute){
-    if (charactersOnlineAtMinusThanOneMinute.length > 5) {
-        const now = new Date();
-        const diffInSec = Math.floor((now - lastPlayed) / 1000);
-        if (diffInSec < 60) {
-            return;
-        }
-        playSelectedSound();
-    }
 }
 
 setInterval(updateCreatedAtTimers, 1000);
