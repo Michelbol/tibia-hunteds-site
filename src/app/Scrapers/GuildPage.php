@@ -12,9 +12,11 @@ use PHPHtmlParser\Dom;
 
 class GuildPage {
     public Collection $onlineDatabaseCharacters;
+    public Collection $onlineCharacters;
     public Collection $offlineDatabaseCharacters;
     public function __construct(private CharacterService $characterService,) {
         $this->onlineDatabaseCharacters = collect();
+        $this->onlineCharacters = collect();
         $this->offlineDatabaseCharacters = collect();
     }
 
@@ -42,6 +44,7 @@ class GuildPage {
                     if ($databaseCharacter === null) {
                         $this->characterService->createByGuildPageCharacter($guildPageCharacter, $guildName);
                     }
+                    $this->onlineCharacters->push($guildPageCharacter->toArray());
                     $this->onlineDatabaseCharacters->push($databaseCharacter);
                     return;
                 }
@@ -69,6 +72,7 @@ class GuildPage {
             'position' => null,
             'position_time' => null,
         ]);
+        $this->characterService->upsert($this->onlineCharacters);
         Character::whereNotIn('id', $onlineCharactersId)->update([
             'is_online' => false,
             'online_at' => null,

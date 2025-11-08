@@ -48,4 +48,15 @@ class GuildPageCharacter {
         $status = Str::replace('</b>', '', $status);
         return Str::lower($status);
     }
+
+    public function toArray(): array {
+        return [
+            'name' => $this->name,
+            'vocation' => $this->vocation,
+            'level' => $this->level,
+            'joining_date' => $this->joining_date,
+            'is_online' => $this->is_online,
+            'guild_name' => $this->guild_name,
+        ];
+    }
 }
