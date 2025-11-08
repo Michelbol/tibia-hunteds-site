@@ -55,6 +55,9 @@ class GuildPage {
             }
         });
 
+        if (sizeof($htmlCharacters) === 0) {
+            return $this;
+        }
         $onlineCharactersId = $this->onlineDatabaseCharacters->pluck('id');
         Character
             ::whereIn('id', $onlineCharactersId)
