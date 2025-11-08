@@ -12,7 +12,7 @@
 <div id="lastUpdate">Atualizado agora</div>
 <div>
     <input readonly disabled name="guild_name" id="guild-name" value="{{ $guilds[0]['name'] }}">
-    <select id="soundSelect" onchange="playSelectedSound()">
+    <select id="soundSelect" onchange="playSelectedSoundNTimes(1, this.value)">
         <option>Sem Som</option>
         <option selected value="logaram_bombas.mp3">Logaram bombas 1</option>
         <option value="logaram_bombas_voz_grossa.mp3">Logaram bombas 2</option>
@@ -116,7 +116,46 @@
         </table>
     </div>
 </div>
+<div id="audio-permission-modal" style="
+  position: fixed;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.8);
+  backdrop-filter: blur(4px);
+  z-index: 9999;
+  color: #f1f1f1;
+  font-family: Arial, sans-serif;
+">
+    <div style="
+    background: #1e1e1e;
+    border: 1px solid #333;
+    padding: 24px 32px;
+    border-radius: 12px;
+    box-shadow: 0 0 20px rgba(0,0,0,0.4);
+    text-align: center;
+    max-width: 400px;
+  ">
+        <h3 style="margin-bottom: 12px;">Bem vindo ao Site de Hunteds</h3>
+        <p style="margin-bottom: 20px; color: #bbb; font-size: 14px;">
+            Ativae ou se não, não vai falar "logaram bombas"
+        </p>
+        <button id="enable-audio-btn"
+                onclick="initAudioOnUserGesture()"
+                style="
+      background: #0078ff;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      font-size: 15px;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: 0.2s;
+    ">Ativar</button>
+    </div>
+</div>
 
-<script src="{{ asset('js/observe.js?v=202511081442') }}"></script>
+<script src="{{ asset('js/observe.js?v=202511081602') }}"></script>
 </body>
 </html>

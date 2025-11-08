@@ -231,17 +231,7 @@ async function fetchOnlineCharacters() {
                 return character;
             }
         });
-        const prevBlocks = Math.floor(lastOnlineCount / 5);
-        const currentBlocks = Math.floor(charactersOnlineAtMinusThanOneMinute.length / 5);
-
-        if (currentBlocks > prevBlocks) {
-            const timesToPlay = currentBlocks - prevBlocks;
-            for (let i = 0; i < timesToPlay; i++) {
-                setTimeout(() => {
-                    playSelectedSound();
-                }, i * 500)
-            }
-        }
+        handleCountIncreaseAndPlay(lastOnlineCount, charactersOnlineAtMinusThanOneMinute.length);
 
         lastOnlineCount = charactersOnlineAtMinusThanOneMinute.length;
         clearTables();
@@ -309,17 +299,111 @@ function showCopyToast(message, duration = 2000) {
 
 const SOUND_PATH = '/sounds/';
 
-function playSelectedSound() {
-    const select = document.getElementById('soundSelect');
-    const value = select.value;
-    if (!value) return;
-
-    const audio = new Audio(SOUND_PATH + value);
-    audio.play().catch(err => console.error('Erro ao tocar som:', err));
-    lastPlayed = new Date();
-}
-
 setInterval(updateCreatedAtTimers, 1000);
 setInterval(updatePositionTimeTimers, 1000);
 fetchOnlineCharacters();
 setInterval(fetchOnlineCharacters, 1500);
+
+// --- variáveis globais ---
+let audioContext = null;
+let audioBufferCache = new Map();
+const DEFAULT_SOUND = 'alert.mp3';
+
+// --- init: chamado após o clique do usuário ---
+async function initAudioOnUserGesture() {
+    try {
+        // AudioContext
+        audioContext = new (window.AudioContext || window.webkitAudioContext)();
+        // pede permissão de Notificações
+        if ('Notification' in window && Notification.permission === 'default') {
+            await Notification.requestPermission();
+        }
+        // tenta Wake Lock (opcional e requer HTTPS)
+        try {
+            if ('wakeLock' in navigator) {
+                await navigator.wakeLock.request('screen'); // previne apagar da tela (se suportado)
+            }
+        } catch (err) {
+            console.warn('WakeLock não disponível ou requisition falhou:', err);
+        }
+        // oculta modal
+        const modal = document.getElementById('audio-permission-modal');
+        if (modal) modal.style.display = 'none';
+    } catch (err) {
+        console.error('Erro ao inicializar audio:', err);
+    }
+}
+
+// --- carregador de sound em buffer (Web Audio) ---
+async function loadSoundBuffer(filename) {
+    if (!audioContext) return null;
+    if (audioBufferCache.has(filename)) return audioBufferCache.get(filename);
+    const url = SOUND_PATH + filename;
+    try {
+        const resp = await fetch(url);
+        const arr = await resp.arrayBuffer();
+        const buffer = await audioContext.decodeAudioData(arr);
+        audioBufferCache.set(filename, buffer);
+        return buffer;
+    } catch (err) {
+        console.error('Falha ao carregar som', url, err);
+        return null;
+    }
+}
+
+// --- toca som usando buffer (permite overlap) ---
+function playBuffer(buffer) {
+    if (!audioContext || !buffer) return;
+    const src = audioContext.createBufferSource();
+    src.buffer = buffer;
+    src.connect(audioContext.destination);
+    src.start(0);
+}
+
+// --- função que toca N vezes com 0.5s entre cada ---
+async function playSelectedSoundNTimes(times, filename = DEFAULT_SOUND) {
+    // rate-limit simples: evita tocar com muita frequência globalmente (por ex 1s)
+    const now = Date.now();
+    if (now - lastPlayed < 300) {
+        // permite curto, mas evita floods
+    }
+    lastPlayed = now;
+
+    // // se a aba está oculta, tenta notificar em vez de tocar (fallback)
+    // if (document.hidden) {
+    //     // se permissões dadas, cria notificações para não depender de audio em background
+    //     if ('Notification' in window && Notification.permission === 'granted') {
+    //         for (let i = 0; i < times; i++) {
+    //             setTimeout(() => {
+    //                 new Notification('Alert', { body: 'Novos caracteres online', tag: 'monitor-alert' });
+    //             }, i * 500);
+    //         }
+    //     } else {
+    //         console.warn('Página oculta e sem permissão de Notification - som ignorado');
+    //     }
+    // }
+
+    if (audioContext && audioContext.state === 'suspended') {
+        try { await audioContext.resume(); } catch (e) { console.warn('Falha ao resumir audioContext', e); }
+    }
+
+    const buffer = await loadSoundBuffer(filename);
+    if (!buffer) return;
+
+    for (let i = 0; i < times; i++) {
+        setTimeout(() => {
+            try { playBuffer(buffer); } catch (e) { console.error('Erro ao tocar buffer', e); }
+        }, i * 500);
+    }
+}
+
+function handleCountIncreaseAndPlay(prevCount, currentCount) {
+    const prevBlocks = Math.floor(prevCount / 5);
+    const currBlocks = Math.floor(currentCount / 5);
+    if (currBlocks > prevBlocks) {
+        const timesToPlay = currBlocks - prevBlocks;
+        const select = document.getElementById('soundSelect');
+        const value = select.value;
+        playSelectedSoundNTimes(timesToPlay, value);
+    }
+}
