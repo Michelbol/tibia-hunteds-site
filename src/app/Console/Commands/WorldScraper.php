@@ -5,7 +5,6 @@ namespace App\Console\Commands;
 use App\Models\ExecutionCrawler;
 use App\Scrapers\GuildPage;
 use Carbon\Carbon;
-use GuzzleHttp\Client;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Log;
 use \Spatie\Browsershot\Browsershot;
@@ -105,34 +104,21 @@ class WorldScraper extends Command {
 
     private function dispatchRequest(string $url): string {
         $requestTimeBegin = microtime(true);
-        $client = new Client([
-            'base_uri' => 'https://www.tibia.com',
-            'timeout'  => 15,
-            'allow_redirects' => true,
-        ]);
-
-        $response = $client->get('/community/', [
-            'query' => [
-                'subtopic'  => 'guilds',
-                'page'      => 'view',
-                'GuildName' => 'Outlaw Warlords',
-            ],
-            'headers' => [
-                'Authority' => 'www.tibia.com',
-                'Accept' => 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8',
-                'Accept-Language' => 'en-US,en;q=0.9,pt-BR;q=0.8,pt;q=0.7',
-                'Cache-Control' => 'no-cache',
-                'Pragma' => 'no-cache',
-                'Sec-Fetch-Dest' => 'document',
-                'Sec-Fetch-Mode' => 'navigate',
-                'Sec-Fetch-Site' => 'none',
-                'Sec-Fetch-User' => '?1',
-                'Upgrade-Insecure-Requests' => '1',
-                'User-Agent' => 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36',
-            ],
-        ]);
-
-        $html = $response->getBody()->getContents();
+        $html = Browsershot::url($url)
+            ->setChromePath(env('PUPPETEER_EXECUTABLE_PATH', '/usr/bin/google-chrome'))
+            ->noSandbox()
+            ->userAgent('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115 Safari/537.36')
+            ->waitUntilNetworkIdle()
+            ->timeout(10)
+            ->addChromiumArguments([
+                '--disable-dev-shm-usage',
+                '--disable-gpu',
+                '--no-first-run',
+                '--disable-setuid-sandbox',
+                '--disable-extensions',
+                '--window-size=1920,1080',
+            ])
+            ->bodyHtml();
         $requestTimeEnd = microtime(true);
         $this->requestTime = $requestTimeEnd - $requestTimeBegin;
         return $html;
