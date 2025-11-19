@@ -110,6 +110,14 @@ class WorldScraper extends Command {
             ->userAgent('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115 Safari/537.36')
             ->waitUntilNetworkIdle()
             ->timeout(10)
+            ->addChromiumArguments([
+                '--disable-dev-shm-usage',
+                '--disable-gpu',
+                '--no-first-run',
+                '--disable-setuid-sandbox',
+                '--disable-extensions',
+                '--window-size=1920,1080',
+            ])
             ->bodyHtml();
         $requestTimeEnd = microtime(true);
         $this->requestTime = $requestTimeEnd - $requestTimeBegin;
