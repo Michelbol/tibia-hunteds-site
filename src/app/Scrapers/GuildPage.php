@@ -8,7 +8,7 @@ use App\Models\Character;
 use App\Scrapers\Exceptions\NotFoundStatusInPage;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Log;
-use PHPHtmlParser\Dom;
+use Illuminate\Support\Str;
 
 class GuildPage {
     public Collection $onlineDatabaseCharacters;
@@ -21,22 +21,30 @@ class GuildPage {
     }
 
     public function scrap(string $html, ?string $guildName = ''): self {
-        $dom = new Dom();
-        $dom->load($html);
+        $dom2 = new \DOMDocument();
+        libxml_use_internal_errors(true);
+        $dom2->loadHTML($html);
+        libxml_clear_errors();
+        $xpath = new \DOMXPath($dom2);
         $guildCharacters = $this->characterService->getAllCharactersByGuildName($guildName);
 
-        $htmlCharacters = $dom->find('#guilds .TableContainer .TableContent tr');
-        unset($htmlCharacters[0]);
-        unset($htmlCharacters[count($htmlCharacters)]);
-        $htmlCharacters->each(function (Dom\HtmlNode $htmlCharacter) use ($guildName, $guildCharacters) {
-            $trAttributes = $htmlCharacter->getAttributes();
-            $isInvitationBoard = $htmlCharacter->find('.DoNotBreak');
-            if ($isInvitationBoard->count() > 0 || (isset($trAttributes['class']) && $trAttributes['class'] === 'LabelH')) {
-                return;
+        $trs = $this->retrieveTrs($xpath);
+        foreach ($trs as $tr) {
+            $classes = $tr->getAttribute('class');
+            if (str_contains($classes, 'LabelH')) {
+                continue;
             }
-            $cells = $htmlCharacter->find('td');
+            $isInvitationBoard = $xpath->query(".//*[contains(@class, 'DoNotBreak')]", $tr);
+            if ($isInvitationBoard->count() > 0){
+                continue;
+            }
+            $text = trim($tr->textContent);
+            if (Str::contains($text, 'No invited characters')) {
+                continue;
+            }
+            $tds = $xpath->query("./td", $tr);
             try {
-                $guildPageCharacter = GuildPageCharacter::buildFromGuildPageCell($cells, $guildName);
+                $guildPageCharacter = GuildPageCharacter::buildFromDOMDocument($tds, $guildName);
                 $databaseCharacter = $guildCharacters->first(function (Character $character) use ($guildPageCharacter) {
                     return $character->name === $guildPageCharacter->name;
                 });
@@ -46,7 +54,7 @@ class GuildPage {
                     }
                     $this->onlineCharacters->push($guildPageCharacter->toArray());
                     $this->onlineDatabaseCharacters->push($databaseCharacter);
-                    return;
+                    continue;
                 }
                 $this->offlineDatabaseCharacters->push($databaseCharacter);
             } catch (NotFoundStatusInPage $e) {
@@ -54,11 +62,11 @@ class GuildPage {
                 Log::info($e->getHtmlNode()->getAttributes());
                 Log::info('[Status Not Found End]');
             } catch (\Exception $exception) {
-                Log::error($exception->getMessage(), $exception->getTrace());
+                Log::error($exception->getMessage());
             }
-        });
+        }
 
-        if (sizeof($htmlCharacters) === 0) {
+        if (sizeof($trs) === 0) {
             return $this;
         }
         $onlineCharactersId = $this->onlineDatabaseCharacters->pluck('id');
@@ -92,5 +100,9 @@ class GuildPage {
 
     public function getOfflineCharacters(): int {
         return $this->offlineDatabaseCharacters->count();
+    }
+
+    private function retrieveTrs(\DOMXPath $xpath): mixed {
+        return $xpath->query('//*[@id="guilds"]//*[contains(@class, "TableContainer")]//*[contains(@class, "TableContent")]//tr');
     }
 }

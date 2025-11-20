@@ -28,6 +28,17 @@ class GuildPageCharacter {
         return $guildPageCharacter;
     }
 
+    public static function buildFromDOMDocument(\DOMNodeList $DOMElement, string $guildName) {
+        $guildPageCharacter = new self();
+        $guildPageCharacter->name = self::removeSpace($DOMElement->item(1)->textContent);
+        $guildPageCharacter->vocation = VocationEnum::from($DOMElement->item(2)->textContent);
+        $guildPageCharacter->level = (int)$DOMElement->item(3)->textContent;
+        $guildPageCharacter->joining_date = Carbon::createFromFormat('M d Y', self::removeSpace($DOMElement->item(4)->textContent));
+        $guildPageCharacter->is_online = self::getStatus($DOMElement->item(5)->textContent) === StatusEnum::ONLINE->value;
+        $guildPageCharacter->guild_name = $guildName;
+        return $guildPageCharacter;
+    }
+
     public function getJoiningDateFormated(): string {
         return $this->joining_date->format('M d Y');
     }
@@ -38,7 +49,10 @@ class GuildPageCharacter {
     }
 
     private static function removeSpace(string $word): string {
-        return Str::replace('&nbsp;', ' ', $word);
+        $word = str_replace(["\xC2\xA0", "\u{00A0}"], " ", $word); // remove NBSP
+        $word = preg_replace('/\s+/u', ' ', $word);                // normaliza
+        $word = Str::replace('&nbsp;', ' ', $word);
+        return trim($word);
     }
     private static function getStatus(string $status): string {
         $status = Str::replace('<span class="green">', '', $status);
