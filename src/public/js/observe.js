@@ -227,7 +227,7 @@ async function fetchOnlineCharacters() {
             const now = new Date();
             const createdAtDate = new Date(character.online_at);
             const diffInSec = Math.floor((now - createdAtDate) / 1000);
-            if (diffInSec < 60) {
+            if (diffInSec < 60 && character.level > 32) {
                 return character;
             }
         });

@@ -156,6 +156,6 @@
     </div>
 </div>
 
-<script src="{{ asset('js/observe.js?v=202511081602') }}"></script>
+<script src="{{ asset('js/observe.js?v=202511192227') }}"></script>
 </body>
 </html>
