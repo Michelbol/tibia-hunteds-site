@@ -156,6 +156,9 @@
     </div>
 </div>
 
-<script src="{{ asset('js/observe.js?v=202511192227') }}"></script>
+<script>
+    window.SERVER_TIME = "{{ now()->format('Y-m-d H:i:s') }}";
+</script>
+<script src="{{ asset('js/observe.js?v=202511192248') }}"></script>
 </body>
 </html>

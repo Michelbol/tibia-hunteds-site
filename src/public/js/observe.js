@@ -9,9 +9,11 @@ document.addEventListener("click", (event) => {
 let contextMenuTarget = null;
 const contextMenu = document.getElementById('contextMenu');
 
+const SERVER_TIMESTAMP = new Date(window.SERVER_TIME + " UTC").getTime();
+const LOCAL_TIMESTAMP_AT_LOAD = Date.now();
 let createdAtMap = new Map();
 let positionTimeMap = new Map();
-let lastPlayed = new Date();
+let lastPlayed = serverDate();
 let lastOnlineCount = 0;
 
 function formatToHHMMSS(seconds) {
@@ -33,7 +35,7 @@ function formatTimestampToTimer(time, id) {
     if (time === null) {
         return;
     }
-    const now = new Date();
+    const now = serverDate();
     const diffInSec = Math.max(0, Math.floor((now - time) / 1000));
     const cell = document.getElementById(id);
     if (cell) {
@@ -80,8 +82,8 @@ function addRow(tableId, index, character) {
     const tbody = document.querySelector(`#${tableId} tbody`);
     const row = document.createElement('tr');
     row.className = 'vocation-tr';
-    const createdAtDate = new Date(character.online_at);
-    const positionAtDate = character.position_time !== null ? new Date(character.position_time) : null;
+    const createdAtDate = serverDate(character.online_at);
+    const positionAtDate = character.position_time !== null ? serverDate(character.position_time) : null;
     createdAtMap.set(`created-at-${tableId}-${index}`, createdAtDate);
     positionTimeMap.set(`position-time-${tableId}-${index}`, positionAtDate);
 
@@ -224,8 +226,8 @@ async function fetchOnlineCharacters() {
         const data = await response.json();
 
         const charactersOnlineAtMinusThanOneMinute = data.onlineCharacters.filter(character => {
-            const now = new Date();
-            const createdAtDate = new Date(character.online_at);
+            const now = serverDate();
+            const createdAtDate = serverDate(character.online_at);
             const diffInSec = Math.floor((now - createdAtDate) / 1000);
             if (diffInSec < 60 && character.level > 32) {
                 return character;
@@ -239,8 +241,8 @@ async function fetchOnlineCharacters() {
         positionTimeMap.clear();
 
         const sortedCharacters = data.onlineCharacters.sort((a, b) => {
-            const timeA = new Date() - new Date(a.online_at);
-            const timeB = new Date() - new Date(b.online_at);
+            const timeA = serverDate() - serverDate(a.online_at);
+            const timeB = serverDate() - serverDate(b.online_at);
             return timeA - timeB; // ordem crescente: menor tempo online primeiro
         });
 
@@ -259,7 +261,7 @@ async function fetchOnlineCharacters() {
         });
 
         document.getElementById('lastUpdate').textContent =
-            `Atualizado em: ${new Date().toLocaleTimeString()}`;
+            `Atualizado em: ${serverDate().toLocaleTimeString()}`;
 
         updateCreatedAtTimers();
         updatePositionTimeTimers();
@@ -406,4 +408,15 @@ function handleCountIncreaseAndPlay(prevCount, currentCount) {
         const value = select.value;
         playSelectedSoundNTimes(timesToPlay, value);
     }
+}
+
+function serverDate(...args) {
+
+    if (args.length > 0) {
+        return new Date(...args);
+    }
+
+    const nowLocal = Date.now();
+    const diff = nowLocal - LOCAL_TIMESTAMP_AT_LOAD;
+    return new Date(SERVER_TIMESTAMP + diff);
 }
