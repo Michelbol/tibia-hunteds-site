@@ -8,7 +8,7 @@ User=www-data
 WorkingDirectory=/var/www/tibia-hunteds-site/src
 ExecStart=/usr/bin/flock -n /tmp/world-scraper.lock /bin/bash -c "php artisan world-scraper;"
 Restart=always
-RestartSec=10
+RestartSec=5
 StandardOutput=append:/var/log/world-scraper.log
 StandardError=append:/var/log/world-scraper.log
 
