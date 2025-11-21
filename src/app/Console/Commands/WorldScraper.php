@@ -29,6 +29,8 @@ class WorldScraper extends Command {
 
     public function handle(): void {
         try {
+            $this->info('========Start Word Scrapper========');
+            $this->info('Initial Date: '.Carbon::now()->toDateTimeString());
             $globalExecutionBegin = microtime(true);
 
             $searchGuild = $this->resolveGuildToSearch();
@@ -77,6 +79,8 @@ class WorldScraper extends Command {
             }
             $this->createExecutionCrawler($searchGuild, $url, $qtdTotal, $qtdOnline, $qtdOffline, $executionTime, $this->scrapTime, $this->requestTime);
         }
+        $this->info('Final Date: '.Carbon::now()->toDateTimeString());
+        $this->info('===================================');
     }
 
     private function createExecutionCrawler(
