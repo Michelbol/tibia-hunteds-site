@@ -139,6 +139,9 @@ function changePosition() {
     position = document.getElementById('input-position').value;
     setCharacterPosition(contextMenuTarget.name, position);
 }
+function changePositionToExit() {
+    setCharacterPosition(contextMenuTarget.name, 'exit');
+}
 
 async function setCharacterType(characterName, newType) {
     try {

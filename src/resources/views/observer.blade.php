@@ -106,6 +106,7 @@
                 <div onclick="setAsAttacker(true)">Marcar como Char de Atk</div>
                 <div onclick="setAsAttacker(false)">Desmarcar como Char de Atk</div>
                 <div onclick="copySio()">Copiar Sio</div>
+                <div onclick="changePositionToExit()">Char no exit</div>
                 <div>
                     <input id="input-position" type="text">
                     <button type="button" onclick="changePosition()">Submit</button>
@@ -159,6 +160,6 @@
 <script>
     window.SERVER_TIME = "{{ now()->format('Y-m-d H:i:s') }}";
 </script>
-<script src="{{ asset('js/observe.js?v=202511192248') }}"></script>
+<script src="{{ asset('js/observe.js?v=202511221645') }}"></script>
 </body>
 </html>
