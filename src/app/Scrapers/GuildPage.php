@@ -50,7 +50,11 @@ class GuildPage {
                 });
                 if ($guildPageCharacter->is_online) {
                     if ($databaseCharacter === null) {
-                        $this->characterService->createByGuildPageCharacter($guildPageCharacter, $guildName);
+                        $databaseCharacter = $this->characterService->createByGuildPageCharacter($guildPageCharacter, $guildName);
+                    }
+                    $guildPageCharacter->online_at = $databaseCharacter->online_at;
+                    if ($databaseCharacter->is_online === false) {
+                        $guildPageCharacter->online_at = now();
                     }
                     $this->onlineCharacters->push($guildPageCharacter->toArray());
                     $this->onlineDatabaseCharacters->push($databaseCharacter);
@@ -70,27 +74,27 @@ class GuildPage {
             return $this;
         }
         $onlineCharactersId = $this->onlineDatabaseCharacters->pluck('id');
-        Character
-            ::whereIn('id', $onlineCharactersId)
-            ->where('online_at', null)
-            ->where('is_online', false)
-        ->update([
-            'is_online' => true,
-            'online_at' => now(),
-            'position' => null,
-            'position_time' => null,
-        ]);
         $this->characterService->upsert($this->onlineCharacters);
-        Character::whereNotIn('id', $onlineCharactersId)->update([
-            'is_online' => false,
-            'online_at' => null,
-            'position' => null,
-            'position_time' => null,]);
-        Character::whereIn('id', $this->offlineDatabaseCharacters->pluck('id'))->update([
-            'is_online' => false,
-            'online_at' => null,
-            'position' => null,
-            'position_time' => null,]);
+        Character
+            ::whereNotIn('id', $onlineCharactersId)
+            ->where('is_online', true)
+            ->update([
+                'is_online' => false,
+                'online_at' => null,
+                'position' => null,
+                'position_time' => null,
+            ]);
+        Character::whereIn('id', $this->offlineDatabaseCharacters->pluck('id'))
+            ->where('is_online', true)
+            ->update([
+                'is_online' => false,
+                'online_at' => null,
+                'position' => null,
+                'position_time' => null,
+            ]);
+        $mergedHtmlCharacters = $this->onlineCharacters->merge($this->offlineDatabaseCharacters);
+        $leaveGuildCharacters = $guildCharacters->whereNotIn('name', $mergedHtmlCharacters->pluck('name'));
+        Character::destroy($leaveGuildCharacters);
         return $this;
     }
 

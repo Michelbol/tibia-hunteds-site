@@ -30,7 +30,7 @@ class CharacterRepository {
         Character::upsert(
             $characters->toArray(),
             ['name'],
-            ['name', 'vocation', 'level', 'joining_date', 'is_online', 'guild_name'],
+            ['name', 'vocation', 'level', 'joining_date', 'is_online', 'guild_name', 'online_at'],
         );
     }
 

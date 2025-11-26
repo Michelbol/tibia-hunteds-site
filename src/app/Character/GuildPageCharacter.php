@@ -16,6 +16,7 @@ class GuildPageCharacter {
     public Carbon $joining_date;
     public bool $is_online;
     public string $guild_name;
+    public ?Carbon $online_at = null;
 
     public static function buildFromGuildPageCell(Collection $cells, string $guildName): self {
         $guildPageCharacter = new self();
@@ -28,7 +29,7 @@ class GuildPageCharacter {
         return $guildPageCharacter;
     }
 
-    public static function buildFromDOMDocument(\DOMNodeList $DOMElement, string $guildName) {
+    public static function buildFromDOMDocument(\DOMNodeList $DOMElement, string $guildName): self {
         $guildPageCharacter = new self();
         $guildPageCharacter->name = self::removeSpace($DOMElement->item(1)->textContent);
         $guildPageCharacter->vocation = VocationEnum::from($DOMElement->item(2)->textContent);
@@ -64,7 +65,7 @@ class GuildPageCharacter {
     }
 
     public function toArray(): array {
-        return [
+        $array = [
             'name' => $this->name,
             'vocation' => $this->vocation,
             'level' => $this->level,
@@ -72,5 +73,9 @@ class GuildPageCharacter {
             'is_online' => $this->is_online,
             'guild_name' => $this->guild_name,
         ];
+        if ($this->online_at !== null) {
+            $array['online_at'] = $this->online_at;
+        }
+        return $array;
     }
 }
