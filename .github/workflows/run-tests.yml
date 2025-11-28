@@ -23,19 +23,19 @@ jobs:
         run: docker compose -f infra/scheduler/docker-compose.yml exec -T world-scraper composer install -q --no-ansi --no-interaction --no-scripts --no-progress --prefer-dist
 
       - name: Directory Permissions
-        run: docker compose -f infra/scheduler/docker-compose.yml exec -T scheduler chmod -R 777 storage bootstrap/cache
+        run: docker compose -f infra/scheduler/docker-compose.yml exec -T world-scraper chmod -R 777 storage bootstrap/cache
 
       - name: Create SqlLite database
-        run: docker compose -f infra/scheduler/docker-compose.yml exec -T scheduler touch database/database.sqlite
+        run: docker compose -f infra/scheduler/docker-compose.yml exec -T world-scraper touch database/database.sqlite
 
       - name: Generate App key
-        run: docker compose -f infra/scheduler/docker-compose.yml exec -T scheduler php artisan key:generate
+        run: docker compose -f infra/scheduler/docker-compose.yml exec -T world-scraper php artisan key:generate
 
       - name: Run Migrations
-        run: docker compose -f infra/scheduler/docker-compose.yml exec -T scheduler php artisan migrate --force
+        run: docker compose -f infra/scheduler/docker-compose.yml exec -T world-scraper php artisan migrate --force
 
       - name: Run Seeders
-        run: docker compose -f infra/scheduler/docker-compose.yml exec -T scheduler php artisan db:seed
+        run: docker compose -f infra/scheduler/docker-compose.yml exec -T world-scraper php artisan db:seed
 
       - name: Run Tests with PHPUnit + Xdebug
-        run: docker compose -f infra/scheduler/docker-compose.yml exec -T scheduler vendor/bin/phpunit --colors=never
+        run: docker compose -f infra/scheduler/docker-compose.yml exec -T world-scraper vendor/bin/phpunit --colors=never
