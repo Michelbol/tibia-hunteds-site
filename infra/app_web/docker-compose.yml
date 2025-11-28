@@ -32,6 +32,28 @@ services:
       - XDEBUG_MODE=off
     networks:
       - laravel
+  scheduler:
+      build:
+        context: ./php
+      image: michelbolzon/tibia-scrapper-scheduler:latest
+      volumes:
+        - ./../../src:/var/www/html
+      command: >
+        sh -c "while true; do php /var/www/html/artisan schedule:run; sleep 60; done"
+      environment:
+        - DB_CONNECTION=${DB_CONNECTION}
+        - DB_HOST=${DB_HOST}
+        - DB_PORT=${DB_PORT}
+        - DB_DATABASE=${DB_DATABASE}
+        - DB_USERNAME=${DB_USERNAME}
+        - DB_PASSWORD=${DB_PASSWORD}
+        - APP_ENV=${APP_ENV}
+        - APP_DEBUG=${APP_DEBUG}
+        - APP_URL=${APP_URL}
+        - APP_KEY=${APP_KEY}
+        - XDEBUG_MODE=off
+      networks:
+        - laravel
 networks:
   laravel:
     driver: bridge
