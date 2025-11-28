@@ -15,6 +15,7 @@ let createdAtMap = new Map();
 let positionTimeMap = new Map();
 let lastPlayed = serverDate();
 let lastOnlineCount = 0;
+let isFetching = false;
 
 function formatToHHMMSS(seconds) {
     const h = String(Math.floor(seconds / 3600)).padStart(2, '0');
@@ -223,6 +224,9 @@ function copyToClipboard(text) {
 }
 
 async function fetchOnlineCharacters() {
+    if (isFetching) return;
+    isFetching = true;
+
     try {
         let guildName = document.getElementById('guild-name').value;
         const response = await fetch('/get-online-characters?guild_name='+guildName);
@@ -271,6 +275,8 @@ async function fetchOnlineCharacters() {
         document.title = sortedCharacters.length + ' Characters Online';
     } catch (error) {
         console.error('Erro ao buscar personagens:', error);
+    } finally {
+        isFetching = false;
     }
 }
 
@@ -304,10 +310,18 @@ function showCopyToast(message, duration = 2000) {
 
 const SOUND_PATH = '/sounds/';
 
+function startPolling() {
+    async function loop() {
+        await fetchOnlineCharacters();
+        setTimeout(loop, 1500);
+    }
+    loop();
+}
+
 setInterval(updateCreatedAtTimers, 1000);
 setInterval(updatePositionTimeTimers, 1000);
 fetchOnlineCharacters();
-setInterval(fetchOnlineCharacters, 1500);
+startPolling();
 
 // --- variáveis globais ---
 let audioContext = null;
