@@ -9,8 +9,7 @@ use Illuminate\Support\Facades\Storage;
 class CharacterRepository {
 
     public function getOnlinePlayer(?string $guildName = null): Collection {
-        $search = now()->subSeconds(2)->format('Y-m-d-H:i:s');
-        $cache = $this->getSearch("online-$search.json");
+        $cache = $this->getSearch();
         if (!is_null($cache) && !$cache->isEmpty()) {
             return $cache;
         }
@@ -22,9 +21,8 @@ class CharacterRepository {
             $query->where('guild_name', $guildName);
         }
         $result = $query->get();
-        $now = now()->format('Y-m-d-H:i:s');
 
-        $this->saveSearch($now, $result);
+        $this->saveSearch($result);
 
         return $result;
     }
@@ -53,12 +51,14 @@ class CharacterRepository {
         Character::where('name', $characterName)->update(['is_attacker_character' => $isAttacker]);
     }
 
-    private function saveSearch(string $now, Collection $result): void {
-        Storage::disk('local')->put('online-' . $now . '.json', json_encode($result));
+    private function saveSearch(Collection $result): void {
+        $now = now()->format('Y-m-d-H-i-s');
+        Storage::disk('local')->put("/cache/online-characters/online-$now.json", json_encode($result));
     }
 
-    private function getSearch(string $fileName): ?Collection {
-        $cache = Storage::disk('local')->get($fileName);
+    private function getSearch(): ?Collection {
+        $search = now()->subSeconds(2)->format('Y-m-d-H-i-s');
+        $cache = Storage::disk('local')->get("/cache/online-characters/online-$search.json");
         if ($cache === false) {
             return null;
         }

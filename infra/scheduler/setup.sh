@@ -48,3 +48,13 @@ sudo systemctl enable world-scraper.service
 sudo systemctl start world-scraper.service
 sudo systemctl status world-scraper.service
 sudo tail -f /var/log/world-scraper.log
+
+#criar serviço no linux
+sudo nano /etc/systemd/system/schedule-run.service
+sudo touch /var/log/schedule-run.log
+sudo chown www-data:www-data /var/log/schedule-run.log
+sudo systemctl daemon-reload
+sudo systemctl enable schedule-run.service
+sudo systemctl start schedule-run.service
+sudo systemctl status schedule-run.service
+sudo tail -f /var/log/schedule-run.log

@@ -1,0 +1,16 @@
+[Unit]
+Description=Laravel Scheduler run
+After=network.target
+
+[Service]
+Type=simple
+User=www-data
+WorkingDirectory=/var/www/tibia-hunteds-site/src
+ExecStart=php artisan schedule:run
+Restart=always
+RestartSec=55
+StandardOutput=append:/var/log/schedule-run.log
+StandardError=append:/var/log/schedule-run.log
+
+[Install]
+WantedBy=multi-user.target
