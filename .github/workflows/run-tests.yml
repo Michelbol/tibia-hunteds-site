@@ -20,7 +20,7 @@ jobs:
 
       # Instala dependências via composer dentro do container
       - name: Install Dependencies
-        run: docker compose -f infra/scheduler/docker-compose.yml exec -T scheduler composer install -q --no-ansi --no-interaction --no-scripts --no-progress --prefer-dist
+        run: docker compose -f infra/scheduler/docker-compose.yml exec -T world-scraper composer install -q --no-ansi --no-interaction --no-scripts --no-progress --prefer-dist
 
       - name: Directory Permissions
         run: docker compose -f infra/scheduler/docker-compose.yml exec -T scheduler chmod -R 777 storage bootstrap/cache
