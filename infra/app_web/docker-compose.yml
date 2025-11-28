@@ -35,7 +35,7 @@ services:
   scheduler:
       build:
         context: ./php
-      image: michelbolzon/tibia-scrapper-scheduler:latest
+      image: michelbolzon/tibia-scrapper-app:latest
       volumes:
         - ./../../src:/var/www/html
       command: >
