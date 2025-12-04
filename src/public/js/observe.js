@@ -83,7 +83,7 @@ function addRow(tableId, index, character) {
     const tbody = document.querySelector(`#${tableId} tbody`);
     const row = document.createElement('tr');
     row.className = 'vocation-tr';
-    const createdAtDate = serverDate(character.online_at);
+    const createdAtDate = serverDate(character.online_at+ " UTC");
     const positionAtDate = character.position_time !== null ? serverDate(character.position_time) : null;
     createdAtMap.set(`created-at-${tableId}-${index}`, createdAtDate);
     positionTimeMap.set(`position-time-${tableId}-${index}`, positionAtDate);

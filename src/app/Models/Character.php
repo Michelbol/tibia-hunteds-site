@@ -39,8 +39,8 @@ class Character extends Model {
             'joining_date' => $this->joining_date,
             'type' => $this->type,
             'is_online' => $this->is_online,
-            'online_at' => $this->online_at ? $this->online_at->timezone('America/Sao_Paulo')->format('Y-m-d H:i:s') : null,
-            'position_time' => $this->position_time ? $this->position_time->timezone('America/Sao_Paulo')->format('Y-m-d H:i:s') : null,
+            'online_at' => $this->online_at ? $this->online_at->format('Y-m-d H:i:s') : null,
+            'position_time' => $this->position_time ? $this->position_time->format('Y-m-d H:i:s') : null,
             'position' => $this->position,
             'is_attacker_character' => $this->is_attacker_character,
         ];

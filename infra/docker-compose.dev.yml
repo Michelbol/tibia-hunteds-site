@@ -28,7 +28,7 @@ services:
   world-scrapper:
     extends:
       file: ./scheduler/docker-compose.yml
-      service: scheduler
+      service: world-scraper
     volumes:
       - ./../src:/var/www/html
 
