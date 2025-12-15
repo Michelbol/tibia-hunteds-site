@@ -29,7 +29,7 @@ function updateCreatedAtTimers() {
 }
 
 function updatePositionTimeTimers() {
-    positionTimeMap.forEach(formatTimestampToTimer);
+    positionTimeMap.forEach(formatTimestampToTimerWithoutColor);
 }
 
 function formatTimestampToTimer(time, id) {
@@ -49,6 +49,19 @@ function formatTimestampToTimer(time, id) {
         } else {
             cell.className = 'normal';
         }
+    }
+}
+
+function formatTimestampToTimerWithoutColor(time, id) {
+    if (time === null) {
+        return;
+    }
+    const now = serverDate();
+    const diffInSec = Math.max(0, Math.floor((now - time) / 1000));
+    const cell = document.getElementById(id);
+    if (cell) {
+        cell.textContent = formatToHHMMSS(diffInSec);
+        cell.className = 'normal';
     }
 }
 function clearTables() {
@@ -84,7 +97,7 @@ function addRow(tableId, index, character) {
     const row = document.createElement('tr');
     row.className = 'vocation-tr';
     const createdAtDate = serverDate(character.online_at+ " UTC");
-    const positionAtDate = character.position_time !== null ? serverDate(character.position_time) : null;
+    const positionAtDate = character.position_time !== null ? serverDate(character.position_time+ " UTC") : null;
     createdAtMap.set(`created-at-${tableId}-${index}`, createdAtDate);
     positionTimeMap.set(`position-time-${tableId}-${index}`, positionAtDate);
 
