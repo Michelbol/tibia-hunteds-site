@@ -247,7 +247,7 @@ async function fetchOnlineCharacters() {
 
         const charactersOnlineAtMinusThanOneMinute = data.onlineCharacters.filter(character => {
             const now = serverDate();
-            const createdAtDate = serverDate(character.online_at);
+            const createdAtDate = serverDate(character.online_at+ " UTC");
             const diffInSec = Math.floor((now - createdAtDate) / 1000);
             if (diffInSec < 60 && character.level > 32) {
                 return character;
@@ -261,8 +261,8 @@ async function fetchOnlineCharacters() {
         positionTimeMap.clear();
 
         const sortedCharacters = data.onlineCharacters.sort((a, b) => {
-            const timeA = serverDate() - serverDate(a.online_at);
-            const timeB = serverDate() - serverDate(b.online_at);
+            const timeA = serverDate() - serverDate(a.online_at+ " UTC");
+            const timeB = serverDate() - serverDate(b.online_at+ " UTC");
             return timeA - timeB; // ordem crescente: menor tempo online primeiro
         });
 

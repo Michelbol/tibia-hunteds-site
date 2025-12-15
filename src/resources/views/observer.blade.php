@@ -160,6 +160,6 @@
 <script>
     window.SERVER_TIME = "{{ now()->format('Y-m-d H:i:s') }}";
 </script>
-<script src="{{ asset('js/observe.js?v=202512151949') }}"></script>
+<script src="{{ asset('js/observe.js?v=202512151952') }}"></script>
 </body>
 </html>
