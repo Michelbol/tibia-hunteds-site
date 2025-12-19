@@ -2,39 +2,36 @@
 
 namespace App\Character;
 
+use App\Character\Repository\CachedCharacterRepository;
 use App\Character\Repository\CharacterRepository;
+use App\Character\Repository\DatabaseCharacterRepository;
 use App\Models\Character;
 use Carbon\Carbon;
 use Illuminate\Support\Collection;
 
 readonly class CharacterService {
+    private CharacterRepository $characterRepository;
     public function __construct(
-        private CharacterRepository $characterRepository,
-    ) {}
+        private DatabaseCharacterRepository $databaseCharacterRepository,
+    ) {
+        $this->characterRepository = new CachedCharacterRepository($this->databaseCharacterRepository);
+    }
 
     public function retrieveOnlinePlayers(?string $guildName = null): Collection {
         return $this->characterRepository->getOnlinePlayer($guildName);
     }
 
     public function updateCharacterType(string $characterName, string $type): void {
-        $this->characterRepository->updateCharacterTypeUsingName($characterName, $type);
+        $this->databaseCharacterRepository->updateCharacterTypeUsingName($characterName, $type);
     }
 
     public function updateCharacterIsAttacker(string $characterName, bool $isAttacker): void {
-        $this->characterRepository->updateCharacterIsAttacker($characterName, $isAttacker);
+        $this->databaseCharacterRepository->updateCharacterIsAttacker($characterName, $isAttacker);
     }
 
-    public function createByGuildPageCharacter(GuildPageCharacter $guildPageCharacter, string $guildName): Character {
-        $character = new Character();
-        $character->name = $guildPageCharacter->name;
-        $character->vocation = $guildPageCharacter->vocation;
-        $character->level = $guildPageCharacter->level;
-        $character->joining_date = $guildPageCharacter->joining_date;
-        $character->is_online = $guildPageCharacter->is_online;
-        $character->guild_name = $guildName;
-        $character->online_at = now();
-        $character->position = null;
-        $character->position_time = null;
+    public function createByGuildPageCharacter(GuildPageCharacter $guildPageCharacter): Character {
+        $guildPageAdapter = new GuildPageCharacterAdapter();
+        $character = $guildPageAdapter->convertGuildPageCharacterIntoCharacter($guildPageCharacter);
         $character->save();
 
         return $character;
@@ -52,7 +49,7 @@ readonly class CharacterService {
     }
 
     public function updateCharacterPosition(string $characterName, string $position): void {
-        $character = $this->characterRepository->firstCharacterByName($characterName);
+        $character = $this->databaseCharacterRepository->firstCharacterByName($characterName);
         if (is_null($character)) {
             return;
         }
@@ -66,10 +63,10 @@ readonly class CharacterService {
             return;
         }
 
-        $this->characterRepository->upsertCharacters($characters);
+        $this->databaseCharacterRepository->upsertCharacters($characters);
     }
 
     public function getAllCharactersByGuildName(?string $guildName): Collection {
-        return $this->characterRepository->getAllCharactersByGuildName($guildName);
+        return $this->databaseCharacterRepository->getAllCharactersByGuildName($guildName);
     }
 }

@@ -143,8 +143,8 @@ class WorldScraper extends Command {
 
     private function scrapPage(string $html, string $searchGuild): GuildPage {
         $scrapingTimeBegin = microtime(true);
-        $guildPage = app(GuildPage::class);
-        $guildPage->scrap($html, $searchGuild);
+        $guildPage = GuildPage::getInstance($html, $searchGuild);
+        $guildPage->scrap();
         $scrapingTimeEnd = microtime(true);
         $this->scrapTime = $scrapingTimeEnd - $scrapingTimeBegin;
         return $guildPage;
