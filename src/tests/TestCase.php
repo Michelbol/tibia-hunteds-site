@@ -2,6 +2,7 @@
 
 namespace Tests;
 
+use App\Scrapers\GuildPage;
 use Illuminate\Foundation\Testing\TestCase as BaseTestCase;
 use Illuminate\Support\Facades\DB;
 
@@ -9,6 +10,7 @@ abstract class TestCase extends BaseTestCase {
     public function tearDown(): void {
         $this->deleteAllRecordsFromDatabase();
         parent::tearDown();
+        GuildPage::reset();
     }
     private function deleteAllRecordsFromDatabase(): void {
         DB::table('cache')->truncate();

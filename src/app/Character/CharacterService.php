@@ -69,4 +69,8 @@ readonly class CharacterService {
     public function getAllCharactersByGuildName(?string $guildName): Collection {
         return $this->databaseCharacterRepository->getAllCharactersByGuildName($guildName);
     }
+
+    public function findCharacterByName(string $name): ?Character {
+        return $this->databaseCharacterRepository->firstCharacterByName($name);
+    }
 }
