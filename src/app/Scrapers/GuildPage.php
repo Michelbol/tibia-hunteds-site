@@ -3,7 +3,6 @@
 namespace App\Scrapers;
 
 use App\Character\CharacterService;
-use App\Character\Factory\GuildPageCharacterFromDomDocument;
 use App\Models\Character;
 use App\Scrapers\Exceptions\NotFoundStatusInPage;
 use Illuminate\Support\Collection;
@@ -11,7 +10,7 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 
 class GuildPage {
-    private static GuildPage $instance;
+    private static ?GuildPage $instance;
     public Collection $onlineDatabaseCharacters;
     public Collection $onlineCharacters;
     public Collection $offlineDatabaseCharacters;
@@ -32,6 +31,10 @@ class GuildPage {
             self::$instance = new GuildPage($html, $guildName);
         }
         return self::$instance;
+    }
+
+    public static function reset(): void {
+        self::$instance = null;
     }
 
     public function scrap(): self {
@@ -63,7 +66,10 @@ class GuildPage {
                 $databaseCharacter = $guildPageTrIterator->findDatabaseCharacter($guildCharacters);
                 if ($guildPageCharacter->is_online) {
                     if ($databaseCharacter === null) {
-                        $databaseCharacter = $this->characterService->createByGuildPageCharacter($guildPageCharacter);
+                        $databaseCharacter = $this->characterService->findCharacterByName($guildPageCharacter->name);
+                        if ($databaseCharacter === null) {
+                            $databaseCharacter = $this->characterService->createByGuildPageCharacter($guildPageCharacter);
+                        }
                     }
                     $guildPageCharacter->online_at = $databaseCharacter->online_at;
                     if ($databaseCharacter->is_online === false) {
