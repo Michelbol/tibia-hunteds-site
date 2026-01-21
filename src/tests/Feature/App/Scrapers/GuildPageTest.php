@@ -33,8 +33,7 @@ class GuildPageTest extends TestCase {
 
         $html = GuildPageHtml::listOfCharacters($guildPageCharacter);
 
-        $guildPage = GuildPage::getInstance($html, GuildEnum::OUTLAW->value);
-        $guildPage->scrap();
+        GuildPage::getInstance($html, GuildEnum::OUTLAW->value)->scrap();
 
         $databaseCharacter->refresh();
         $this->assertTrue($databaseCharacter->is_online);
@@ -63,8 +62,7 @@ class GuildPageTest extends TestCase {
 
         $html = GuildPageHtml::listOfCharacters($guildPageCharacter);
 
-        $guildPage = GuildPage::getInstance($html, GuildEnum::OUTLAW->value);
-        $guildPage->scrap();
+        GuildPage::getInstance($html, GuildEnum::OUTLAW->value)->scrap();
 
         $databaseCharacter->refresh();
         $this->assertFalse($databaseCharacter->is_online);
@@ -93,8 +91,7 @@ class GuildPageTest extends TestCase {
 
         $html = GuildPageHtml::listOfCharacters($guildPageCharacter);
 
-        $guildPage = GuildPage::getInstance($html, GuildEnum::OUTLAW->value);
-        $guildPage->scrap();
+        GuildPage::getInstance($html, GuildEnum::OUTLAW->value)->scrap();
 
         $foundCharacter = Character::where('id', $databaseCharacter->id)->first();
         $this->assertNull($foundCharacter);
