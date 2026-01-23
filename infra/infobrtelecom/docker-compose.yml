@@ -1,0 +1,37 @@
+services:
+  web:
+    extends:
+      file: ./../app_web/docker-compose.yml
+      service: web
+    volumes:
+      - ./../../src:/var/www/html
+      - ./default.conf:/etc/nginx/conf.d/default.conf
+    ports:
+      - "8080:80"
+
+  app:
+    extends:
+      file: ./../app_web/docker-compose.yml
+      service: app
+    volumes:
+      - ./../../src:/var/www/html
+
+  db:
+    extends:
+      file: ./../db/docker-compose.yml
+      service: db
+
+  world-scrapper:
+    extends:
+      file: ./../scheduler/docker-compose.yml
+      service: world-scraper
+    volumes:
+      - ./../../src:/var/www/html
+
+networks:
+  public:
+  laravel:
+    driver: bridge
+
+volumes:
+  dbdata:
