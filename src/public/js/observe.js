@@ -130,6 +130,7 @@ function addRow(tableId, index, character) {
         contextMenu.style.top = `${event.pageY}px`;
         contextMenu.style.left = `${event.pageX}px`;
         contextMenu.style.display = "block";
+        document.getElementById('input-position').focus();
     });
 
     tbody.appendChild(row);

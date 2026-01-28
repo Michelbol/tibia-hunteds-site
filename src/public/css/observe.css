@@ -124,3 +124,31 @@ th {
 .vocation-text {
     line-height: 1;        /* evita desalinhamento em fontes grandes */
 }
+
+.btn-windows {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+
+    padding: 6px 10px;
+
+    background: transparent;
+    color: #ffffff;
+
+    border: 1px solid #3a3a3a;
+    border-radius: 4px;
+
+    font-size: 13px;
+    text-decoration: none;
+
+    transition: background .15s ease, border .15s ease;
+}
+
+.btn-windows:hover {
+    background: rgba(255,255,255,0.08);
+    border-color: #5a5a5a;
+}
+
+.btn-windows:active {
+    background: rgba(255,255,255,0.12);
+}

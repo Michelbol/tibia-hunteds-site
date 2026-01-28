@@ -4,6 +4,7 @@ namespace App\Console\Commands;
 
 use App\Models\ExecutionCrawler;
 use App\Scrapers\GuildPage;
+use App\Setting\SettingService;
 use Carbon\Carbon;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Log;
@@ -12,20 +13,8 @@ class WorldScraper extends Command {
 
     protected $signature = 'world-scraper {guild?} {debuggerMode?}';
     protected $description = 'Guild Page Scraper';
-    private ?string $guild;
     private float $requestTime;
     private float $scrapTime;
-
-    private const GUILDS_NAME = [
-        [
-            'id' => 'time',
-            'name' => 'quelibraland'
-        ],
-        [
-            'id' => 'contra',
-            'name' => 'Outlaw%20Warlords'
-        ],
-    ];
 
     public function handle(): void {
         try {
@@ -35,7 +24,13 @@ class WorldScraper extends Command {
 
             $searchGuild = $this->resolveGuildToSearch();
             $timestamp = Carbon::now()->timestamp;
-            $url = "https://www.tibia.com/community/?subtopic=guilds&page=view&GuildName=$searchGuild&timestamp=$timestamp" . random_int(100, 200);
+            $params = [
+                'subtopic'  => 'guilds',
+                'page'      => 'view',
+                'GuildName' => $searchGuild,
+                'timestamp' => $timestamp.random_int(100, 200),
+            ];
+            $url = 'https://www.tibia.com/community/?' . http_build_query($params);
             $html = $this->dispatchRequest($url);
             $guildPage = $this->scrapPage($html, $searchGuild);
 
@@ -151,10 +146,7 @@ class WorldScraper extends Command {
     }
 
     private function resolveGuildToSearch(): string {
-        $this->guild = $this->argument('guild');
-        if ($this->guild === self::GUILDS_NAME[0]['id']) {
-            return self::GUILDS_NAME[0]['name'];
-        }
-        return self::GUILDS_NAME[1]['name'];
+        $setting = new SettingService();
+        return $setting->getGuildName()->value;
     }
 }

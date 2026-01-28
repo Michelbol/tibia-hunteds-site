@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Setting\SettingService;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
@@ -14,21 +15,17 @@ class HomeController extends Controller {
     public function __construct(
         private readonly CharacterService $characterService,
         private readonly CharacterOnlineTimeService $characterOnlineTimeService,
+        private readonly SettingService $settingService,
     ){}
 
     public function index(Request $request): View {
-        $guilds = [
-            [
-                'name' => 'Outlaw Warlords',
-                'value' => 'Outlaw%20Warlords'
-            ]
-        ];
+        $guildName = $this->settingService->getGuildName();
         $search = $request->get('guild_name');
-        return view('observer', compact('guilds', 'search'));
+        return view('observer', compact('guildName', 'search'));
     }
 
     public function getOnlineCharacters(Request $request): JsonResponse {
-        $guildName = 'Outlaw%20Warlords';
+        $guildName = $request->get('guild_name');
         return response()->json(['onlineCharacters' => $this->characterService->retrieveOnlinePlayers($guildName)]);
     }
 
@@ -60,5 +57,17 @@ class HomeController extends Controller {
         $info = $this->characterOnlineTimeService->retrieveOnlineTimeByOnlineAt($requestDate);
         $day = $requestDate->format('Y-m-d');
         return view('online-graphics-gant', compact('info', 'day'));
+    }
+
+    public function settings(): View {
+        $setting = $this->settingService->getGuildName();
+        $guildName = $setting?->value;
+        return view('settings', compact('guildName'));
+    }
+    public function saveSettings(): View {
+        $requestGuildName = request()->get('guild_name');
+        $setting = $this->settingService->saveGuildName($requestGuildName);
+        $guildName = $setting->value;
+        return view('settings', compact('guildName'));
     }
 }
