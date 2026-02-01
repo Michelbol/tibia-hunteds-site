@@ -16,7 +16,7 @@ class GuildPageCharacterFromDomDocument implements GuildPageCharacterFactory {
 
     public function buildGuildPageCharacter(): GuildPageCharacter {
         $guildPageCharacter = new GuildPageCharacter();
-        $guildPageCharacter->name = GuildPageCharacter::removeSpace($this->DOMElement->item(1)->textContent);
+        $guildPageCharacter->name = GuildPageCharacter::removeSpace($this->DOMElement->item(1)->getElementsByTagName('a')->item(0)->textContent);
         $guildPageCharacter->vocation = VocationEnum::from($this->DOMElement->item(2)->textContent);
         $guildPageCharacter->level = (int)$this->DOMElement->item(3)->textContent;
         $guildPageCharacter->joining_date = Carbon::createFromFormat('M d Y', GuildPageCharacter::removeSpace($this->DOMElement->item(4)->textContent));
