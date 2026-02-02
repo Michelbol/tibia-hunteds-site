@@ -23,10 +23,10 @@ services:
     restart: no
   scheduler:
     extends:
-      file: ./../app_web/docker-compose.yml
+      file: ./app_web/docker-compose.yml
       service: scheduler
     volumes:
-      - ./../../src:/var/www/html
+      - ./../src:/var/www/html
     restart: no
 
   db:
