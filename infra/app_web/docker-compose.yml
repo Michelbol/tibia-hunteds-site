@@ -12,6 +12,7 @@ services:
       - laravel
     depends_on:
       - app
+    restart: always
   app:
     build:
       context: ./php
@@ -32,6 +33,7 @@ services:
       - XDEBUG_MODE=off
     networks:
       - laravel
+    restart: always
   scheduler:
       build:
         context: ./php
@@ -54,6 +56,7 @@ services:
         - XDEBUG_MODE=off
       networks:
         - laravel
+      restart: always
 networks:
   laravel:
     driver: bridge

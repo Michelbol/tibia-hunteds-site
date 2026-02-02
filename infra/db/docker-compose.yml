@@ -12,6 +12,7 @@ services:
       - "${DB_PORT}:${DB_PORT}"
     networks:
       - laravel
+    restart: always
 volumes:
   dbdata:
 

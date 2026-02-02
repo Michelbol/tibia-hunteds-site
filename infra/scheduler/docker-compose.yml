@@ -20,6 +20,7 @@ services:
       - APP_KEY=${APP_KEY}
     networks:
       - laravel
+    restart: always
 networks:
   laravel:
     driver: bridge
