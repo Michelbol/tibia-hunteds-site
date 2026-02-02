@@ -15,6 +15,12 @@ services:
       service: app
     volumes:
       - ./../../src:/var/www/html
+  scheduler:
+    extends:
+      file: ./../app_web/docker-compose.yml
+      service: scheduler
+    volumes:
+      - ./../../src:/var/www/html
 
   db:
     extends:
