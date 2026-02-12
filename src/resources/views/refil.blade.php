@@ -262,7 +262,8 @@
                     {nome: "Crítico", qtd: 1, peso: 0, img: "/img/Strike_(Dano_Crítico).gif"}
 
                 ]
-            }, {
+            },
+            {
                 min: 500,
                 max: 600,
                 itens: [
@@ -306,7 +307,8 @@
                     {nome: "Crítico", qtd: 1, peso: 0, img: "/img/Strike_(Dano_Crítico).gif"}
 
                 ]
-            }, {
+            },
+            {
                 min: 300,
                 max: 400,
                 itens: [
@@ -393,7 +395,8 @@
                     {nome: "Crítico", qtd: 1, peso: 0, img: "/img/Strike_(Dano_Crítico).gif"}
 
                 ]
-            },{
+            },
+            {
                 min: 130,
                 max: 200,
                 itens: [
@@ -438,15 +441,54 @@
                 ]
             },
         ],
+        Paladin: [
+            {
+                min: 500,
+                max: 800,
+                itens: [
+                    //Potions
+                    {nome: "Ultimate Spirit Potion", qtd: 600, peso: 3.1, img: "/img/Ultimate_Spirit_Potion.gif"},
+                    {nome: "Great Mana Potion", qtd: 600, peso: 3.1, img: "/img/Great_Mana_Potion.gif"},
 
-        Paladin: [{
-            min: 1,
-            max: 9999,
-            itens: [
-                {nome: "Great Spirit Potion", qtd: 600, peso: 1.9, img: "/img/Great_Spirit_Potion.gif"},
-                {nome: "Diamond Arrow", qtd: 1200, peso: 0.8, img: "/img/Diamond_Arrow.gif"}
-            ]
-        }]
+                    //Ammunition
+                    {nome: "Diamond Arrow", qtd: 200, peso: 0.8, img: "/img/Diamond_Arrow.gif"},
+                    {nome: "Spectral Bolt", qtd: 1000, peso: 0.9, img: "/img/Spectral_Bolt.gif"},
+
+                    // Runes
+                    {nome: "Avalanche Rune", qtd: 150, peso: 0.52, img: "/img/Avalanche_Rune.gif"},
+                    {nome: "Sudden Death Rune", qtd: 300, peso: 0.70, img: "/img/Sudden_Death_Rune.gif"},
+                    {nome: "Magic Wall Rune", qtd: 200, peso: 0.70, img: "/img/Magic_Wall_Rune.gif"},
+                    {nome: "Destroy Field Rune", qtd: 50, peso: 0.70, img: "/img/Destroy_Field_Rune.gif"},
+                    {nome: "Disintegrate Rune", qtd: 50, peso: 0.70, img: "/img/Disintegrate_Rune.gif"},
+                    {nome: "Poison Bomb Rune", qtd: 20, peso: 1.05, img: "/img/Poison_Bomb_Rune.gif"},
+                    {nome: "Fire Bomb Rune", qtd: 20, peso: 1.05, img: "/img/Fire_Bomb_Rune.gif"},
+                    {nome: "Energy Bomb Rune", qtd: 20, peso: 1.05, img: "/img/Energy_Bomb_Rune.gif"},
+
+                    // Rings & Amulets
+                    {nome: "Prismatic Ring", qtd: 1, peso: 1.05, img: "/img/Prismatic_Ring.gif"},
+                    {nome: "Time Ring", qtd: 10, peso: 0.9, img: "/img/Time_Ring.gif"},
+                    {nome: "Energy Ring", qtd: 5, peso: 0.8, img: "/img/Energy_Ring.gif"},
+                    {nome: "Might Ring", qtd: 20, peso: 1.0, img: "/img/Might_Ring.gif"},
+                    {nome: "Dwarven Ring", qtd: 5, peso: 1.1, img: "/img/Dwarven_Ring.gif"},
+                    {nome: "Stone Skin Amulet", qtd: 20, peso: 7.0, img: "/img/Stone_Skin_Amulet.gif"},
+                    {nome: "Prismatic Necklace", qtd: 2, peso: 6.5, img: "/img/Prismatic_Necklace.gif"},
+                    {nome: "Gill Necklace", qtd: 2, peso: 4.1, img: "/img/Gill_Necklace.gif"},
+                    {nome: "Glacier Amulet", qtd: 5, peso: 5.0, img: "/img/Glacier_Amulet.gif"},
+                    {nome: "Stealth Ring", qtd: 5, peso: 5.0, img: "/img/Stealth_Ring.gif"},
+
+                    // Equipment
+                    {nome: "Void Boots", qtd: 2, peso: 15, img: "/img/Void_Boots.gif"},
+
+                    // Outros
+                    {nome: "Honey Flower", qtd: 20, peso: 10, img: "/img/Honey_Flower.gif"},
+
+                    // Sistema (sem peso físico)
+                    {nome: "Frag", qtd: 1, peso: 0, img: "/img/Red_Skull.gif"},
+                    {nome: "Bless", qtd: 1, peso: 0, img: "/img/Amulet_of_Loss.gif"},
+                    {nome: "Crítico", qtd: 1, peso: 0, img: "/img/Strike_(Dano_Crítico).gif"},
+                ]
+            }
+        ]
     };
 
     function gerarLista() {
