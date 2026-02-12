@@ -309,6 +309,50 @@
                 ]
             },
             {
+                min: 401,
+                max: 500,
+                itens: [
+                    // Potions
+                    {nome: "Ultimate Mana Potion", qtd: 500, peso: 3.1, img: "/img/Ultimate_Mana_Potion.gif"},
+                    {nome: "Magic Shield Potion", qtd: 5, peso: 3.2, img: "/img/Magic_Shield_Potion.gif"},
+
+                    // Runes
+                    {nome: "Avalanche Rune", qtd: 100, peso: 0.52, img: "/img/Avalanche_Rune.gif"},
+                    {nome: "Sudden Death Rune", qtd: 200, peso: 0.70, img: "/img/Sudden_Death_Rune.gif"},
+                    {nome: "Magic Wall Rune", qtd: 100, peso: 0.70, img: "/img/Magic_Wall_Rune.gif"},
+                    {nome: "Wild Growth Rune", qtd: 20, peso: 1.05, img: "/img/Wild_Growth_Rune.gif"},
+                    {nome: "Destroy Field Rune", qtd: 20, peso: 0.70, img: "/img/Destroy_Field_Rune.gif"},
+                    {nome: "Disintegrate Rune", qtd: 20, peso: 0.70, img: "/img/Disintegrate_Rune.gif"},
+                    {nome: "Poison Bomb Rune", qtd: 20, peso: 1.05, img: "/img/Poison_Bomb_Rune.gif"},
+                    {nome: "Fire Bomb Rune", qtd: 20, peso: 1.05, img: "/img/Fire_Bomb_Rune.gif"},
+                    {nome: "Energy Bomb Rune", qtd: 20, peso: 1.05, img: "/img/Energy_Bomb_Rune.gif"},
+                    {nome: "Paralyse Rune", qtd: 50, peso: 2.1, img: "/img/Paralyse_Rune.gif"},
+
+                    // Rings & Amulets
+                    {nome: "Prismatic Ring", qtd: 1, peso: 1.05, img: "/img/Prismatic_Ring.gif"},
+                    {nome: "Time Ring", qtd: 10, peso: 0.9, img: "/img/Time_Ring.gif"},
+                    {nome: "Might Ring", qtd: 20, peso: 1.0, img: "/img/Might_Ring.gif"},
+                    {nome: "Dwarven Ring", qtd: 5, peso: 1.1, img: "/img/Dwarven_Ring.gif"},
+                    {nome: "Stone Skin Amulet", qtd: 20, peso: 7.0, img: "/img/Stone_Skin_Amulet.gif"},
+                    {nome: "Prismatic Necklace", qtd: 3, peso: 6.5, img: "/img/Prismatic_Necklace.gif"},
+                    {nome: "Gill Necklace", qtd: 2, peso: 4.1, img: "/img/Gill_Necklace.gif"},
+                    {nome: "Glacier Amulet", qtd: 5, peso: 5.0, img: "/img/Glacier_Amulet.gif"},
+
+                    // Equipment
+                    {nome: "Tiara of Power", qtd: 2, peso: 11.5, img: "/img/Tiara_of_Power.gif"},
+                    {nome: "Void Boots", qtd: 2, peso: 15, img: "/img/Void_Boots.gif"},
+
+                    // Outros
+                    {nome: "Honey Flower", qtd: 20, peso: 10, img: "/img/Honey_Flower.gif"},
+
+                    // Sistema (sem peso físico)
+                    {nome: "Frag", qtd: 1, peso: 0, img: "/img/Red_Skull.gif"},
+                    {nome: "Bless", qtd: 1, peso: 0, img: "/img/Amulet_of_Loss.gif"},
+                    {nome: "Crítico", qtd: 1, peso: 0, img: "/img/Strike_(Dano_Crítico).gif"}
+
+                ]
+            },
+            {
                 min: 300,
                 max: 400,
                 itens: [
