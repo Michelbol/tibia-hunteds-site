@@ -154,12 +154,12 @@
         <label>Vocação:</label>
         <select id="vocacao">
             <option value="">Selecione</option>
-            <option value="Mage">Mage</option>
+            <option selected value="Mage">Mage</option>
             <option value="Paladin">Paladin</option>
         </select>
 
         <label style="margin-left:20px;">Level:</label>
-        <input type="number" id="level" min="1"/>
+        <input type="number" id="level" min="1" value="600"/>
 
         <button onclick="gerarLista()">Gerar Lista</button>
         <div style="margin-top:15px;">
@@ -661,7 +661,7 @@
     /* Atualiza automaticamente */
     document.getElementById("vocacao").addEventListener("change", atualizarCapacidade);
     document.getElementById("level").addEventListener("input", atualizarCapacidade);
-
+    gerarLista();
 </script>
 
 </body>
