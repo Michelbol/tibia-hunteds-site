@@ -70,4 +70,8 @@ class HomeController extends Controller {
         $guildName = $setting->value;
         return view('settings', compact('guildName'));
     }
+
+    public function refil(): View {
+        return view('refil');
+    }
 }

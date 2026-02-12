@@ -8,6 +8,7 @@ Route::get('/login', [LoginController::class, 'index'])->name('login.index');
 Route::post('/login', [LoginController::class, 'login'])->name('login');
 Route::get('/', [HomeController::class, 'index'])->name('home');
 Route::get('/get-online-characters', [HomeController::class, 'getOnlineCharacters']);
+Route::get('/refil', [HomeController::class, 'refil']);
 
 Route::middleware(['auth'])->group(function () {
     Route::get('/admin', [HomeController::class, 'index'])->name('home');
