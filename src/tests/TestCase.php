@@ -2,6 +2,7 @@
 
 namespace Tests;
 
+use App\Models\Setting;
 use App\Scrapers\GuildPage;
 use Illuminate\Foundation\Testing\TestCase as BaseTestCase;
 use Illuminate\Support\Facades\DB;
