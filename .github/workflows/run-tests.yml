@@ -1,15 +1,16 @@
-name: Laravel
+name: CI
 
 on:
   pull_request:
-  push:
+    branches:
+      - main
 
 jobs:
   laravel-tests:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
       - name: Create .env
         run: cp src/.env.testing infra/scheduler/.env

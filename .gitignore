@@ -5,3 +5,5 @@
 /.phpunit.cache
 /.vscode
 /.zed
+.claude/settings.local.json
+src/.claude/settings.local.json

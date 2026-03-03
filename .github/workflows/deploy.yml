@@ -1,0 +1,76 @@
+name: Deploy
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  test:
+    name: Run Tests
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Create .env
+        run: cp src/.env.testing infra/scheduler/.env
+
+      - name: Build and start containers
+        run: docker compose -f infra/scheduler/docker-compose.yml up -d
+
+      - name: Install Dependencies
+        run: docker compose -f infra/scheduler/docker-compose.yml exec -T world-scraper composer install -q --no-ansi --no-interaction --no-scripts --no-progress --prefer-dist
+
+      - name: Directory Permissions
+        run: docker compose -f infra/scheduler/docker-compose.yml exec -T world-scraper chmod -R 777 storage bootstrap/cache
+
+      - name: Create SqlLite database
+        run: docker compose -f infra/scheduler/docker-compose.yml exec -T world-scraper touch database/database.sqlite
+
+      - name: Generate App key
+        run: docker compose -f infra/scheduler/docker-compose.yml exec -T world-scraper php artisan key:generate
+
+      - name: Run Migrations
+        run: docker compose -f infra/scheduler/docker-compose.yml exec -T world-scraper php artisan migrate --force
+
+      - name: Run Seeders
+        run: docker compose -f infra/scheduler/docker-compose.yml exec -T world-scraper php artisan db:seed
+
+      - name: Run Tests with PHPUnit + Xdebug
+        run: docker compose -f infra/scheduler/docker-compose.yml exec -T world-scraper vendor/bin/phpunit --colors=never
+
+  deploy:
+    name: Deploy to Servers
+    needs: test
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Deploy to Front
+        uses: appleboy/ssh-action@v1.2.0
+        with:
+          host: ${{ secrets.DEPLOY_HOST_FRONT }}
+          username: ${{ secrets.DEPLOY_USER }}
+          key: ${{ secrets.DEPLOY_SSH_KEY }}
+          fingerprint: ${{ secrets.DEPLOY_HOST_FRONT_FINGERPRINT }}
+          script: |
+            cd /var/www/tibia-hunteds-site
+            git fetch --all
+            git reset --hard ${{ github.sha }}
+            composer install --no-dev --optimize-autoloader --no-interaction --no-ansi
+            php artisan migrate --force
+
+      - name: Deploy to Crawler
+        uses: appleboy/ssh-action@v1.2.0
+        with:
+          host: ${{ secrets.DEPLOY_HOST_CRAWLER }}
+          username: ${{ secrets.DEPLOY_USER }}
+          key: ${{ secrets.DEPLOY_SSH_KEY }}
+          fingerprint: ${{ secrets.DEPLOY_HOST_CRAWLER_FINGERPRINT }}
+          script: |
+            cd /var/www/tibia-hunteds-site
+            git fetch --all
+            git reset --hard ${{ github.sha }}
+            composer install --no-dev --optimize-autoloader --no-interaction --no-ansi
+            php artisan migrate --force
+            sudo systemctl restart world-scraper.service schedule-run.service
