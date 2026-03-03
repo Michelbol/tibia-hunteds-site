@@ -24,5 +24,6 @@ abstract class TestCase extends BaseTestCase {
         DB::table('character_online_times')->truncate();
         DB::table('characters')->truncate();
         DB::table('execution_crawlers')->truncate();
+        DB::table('settings')->truncate();
     }
 }
