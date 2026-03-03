@@ -5,7 +5,9 @@ use App\Character\GuildEnum;
 use App\Character\GuildPageCharacter;
 use App\Character\VocationEnum;
 use App\Models\Character;
+use App\Models\Setting;
 use App\Scrapers\GuildPage;
+use App\Setting\SettingConfig;
 use Carbon\Carbon;
 use Tests\Support\GuildPageHtml;
 use Tests\TestCase;
@@ -13,6 +15,7 @@ use Tests\TestCase;
 class GuildPageTest extends TestCase {
 
     public function testScrap_WhenPlayerIsOfflineInDatabase_AndIsOnlineOnHtml_ShouldMarkAsOnline(): void {
+        Setting::factory()->create(['name' => SettingConfig::GUILD_NAME->value]);
         Carbon::setTestNow($expectedOnlineAt = Carbon::now());
         $guildPageCharacter = new GuildPageCharacter();
         $guildPageCharacter->rank = 'Leader';

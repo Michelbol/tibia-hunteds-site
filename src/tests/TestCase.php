@@ -2,6 +2,7 @@
 
 namespace Tests;
 
+use App\Models\Setting;
 use App\Scrapers\GuildPage;
 use Illuminate\Foundation\Testing\TestCase as BaseTestCase;
 use Illuminate\Support\Facades\DB;
@@ -23,5 +24,6 @@ abstract class TestCase extends BaseTestCase {
         DB::table('character_online_times')->truncate();
         DB::table('characters')->truncate();
         DB::table('execution_crawlers')->truncate();
+        DB::table('settings')->truncate();
     }
 }
