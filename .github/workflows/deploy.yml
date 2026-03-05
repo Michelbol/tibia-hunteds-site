@@ -50,8 +50,8 @@ jobs:
         uses: appleboy/ssh-action@v1.2.0
         with:
           host: ${{ secrets.DEPLOY_HOST_FRONT }}
-          username: ${{ secrets.DEPLOY_USER }}
-          key: ${{ secrets.DEPLOY_SSH_KEY }}
+          username: ${{ secrets.DEPLOY_USER_FRONT }}
+          key: ${{ secrets.DEPLOY_SSH_KEY_FRONT }}
           fingerprint: ${{ secrets.DEPLOY_HOST_FRONT_FINGERPRINT }}
           script: |
             cd /var/www/tibia-hunteds-site
@@ -64,8 +64,8 @@ jobs:
         uses: appleboy/ssh-action@v1.2.0
         with:
           host: ${{ secrets.DEPLOY_HOST_CRAWLER }}
-          username: ${{ secrets.DEPLOY_USER }}
-          key: ${{ secrets.DEPLOY_SSH_KEY }}
+          username: ${{ secrets.DEPLOY_USER_CRAWLER }}
+          key: ${{ secrets.DEPLOY_SSH_KEY_CRAWLER }}
           fingerprint: ${{ secrets.DEPLOY_HOST_CRAWLER_FINGERPRINT }}
           script: |
             cd /var/www/tibia-hunteds-site
