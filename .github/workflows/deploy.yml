@@ -52,7 +52,6 @@ jobs:
           host: ${{ secrets.DEPLOY_HOST_FRONT }}
           username: ${{ secrets.DEPLOY_USER_FRONT }}
           key: ${{ secrets.DEPLOY_SSH_KEY_FRONT }}
-          fingerprint: ${{ secrets.DEPLOY_HOST_FRONT_FINGERPRINT }}
           script: |
             cd /var/www/tibia-hunteds-site
             git fetch --all
@@ -66,7 +65,6 @@ jobs:
           host: ${{ secrets.DEPLOY_HOST_CRAWLER }}
           username: ${{ secrets.DEPLOY_USER_CRAWLER }}
           key: ${{ secrets.DEPLOY_SSH_KEY_CRAWLER }}
-          fingerprint: ${{ secrets.DEPLOY_HOST_CRAWLER_FINGERPRINT }}
           script: |
             cd /var/www/tibia-hunteds-site
             git fetch --all
