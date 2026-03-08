@@ -56,8 +56,10 @@ jobs:
             cd /var/www/tibia-hunteds-site
             git fetch --all
             git reset --hard ${{ github.sha }}
-            composer install --no-dev --optimize-autoloader --no-interaction --no-ansi
-            php artisan migrate --force
+            docker exec app_web-app-1 composer install --no-dev --optimize-autoloader --no-interaction --no-ansi
+            docker exec app_web-app-1 php artisan config:cache
+            docker exec app_web-app-1 php artisan route:cache
+            docker exec app_web-app-1 php artisan view:cache
 
       - name: Deploy to Crawler
         uses: appleboy/ssh-action@v1.2.0
@@ -71,4 +73,7 @@ jobs:
             git reset --hard ${{ github.sha }}
             composer install --no-dev --optimize-autoloader --no-interaction --no-ansi
             php artisan migrate --force
+            php artisan config:cache
+            php artisan route:cache
+            php artisan view:cache
             sudo systemctl restart world-scraper.service schedule-run.service
