@@ -72,6 +72,14 @@ class GuildPageTest extends TestCase {
         $this->assertNull($databaseCharacter->online_at);
     }
 
+    public function testScrap_WhenTrHasLessThan6Tds_ShouldSkipRowWithoutError(): void {
+        $html = GuildPageHtml::listOfCharactersWithInvalidTdCount();
+
+        GuildPage::getInstance($html, GuildEnum::OUTLAW->value)->scrap();
+
+        $this->assertDatabaseCount('characters', 0);
+    }
+
     public function testScrap_WhenPlayerIsOnlineInDatabase_AndDidntExistsInHtml_ShouldMarkAsOfflineAndDeleteFromDatabase() {
         Carbon::setTestNow($expectedOnlineAt = Carbon::now());
         $guildPageCharacter = new GuildPageCharacter();

@@ -55,6 +55,21 @@ HTML;
 HTML;
     }
 
+    public static function listOfCharactersWithInvalidTdCount(): string {
+        $invalidRow = '<tr bgcolor="#F1E0C6"><td>Leader</td><td>Only Four</td><td>Knight</td><td>100</td></tr>';
+        $html = <<<HTML
+        <div id="guilds">
+            <div class="TableContainer">
+                <table class="TableContent">
+                    <tr class="LabelH"><td>Rank</td><td>Name</td><td>Vocation</td><td>Level</td><td>Joining Date</td><td>Status</td></tr>
+                    $invalidRow
+                </table>
+            </div>
+        </div>
+HTML;
+        return $html;
+    }
+
     private static function buildOnlineTd(bool $isOnline): string {
         return $isOnline ?
             '<td class="onlinestatus"><span class="green"><b>online</b></span></td></tr>':
