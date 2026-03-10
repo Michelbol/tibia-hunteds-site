@@ -76,6 +76,7 @@ class GuildPage {
                         }
                     }
                     $guildPageCharacter->online_at = $databaseCharacter->online_at;
+                    $guildPageCharacter->offline_at = null;
                     if ($databaseCharacter->is_online === false) {
                         $guildPageCharacter->online_at = now();
                     }
@@ -104,6 +105,7 @@ class GuildPage {
             ->update([
                 'is_online' => false,
                 'online_at' => null,
+                'offline_at' => now(),
                 'position' => null,
                 'position_time' => null,
             ]);
@@ -112,6 +114,7 @@ class GuildPage {
             ->update([
                 'is_online' => false,
                 'online_at' => null,
+                'offline_at' => now(),
                 'position' => null,
                 'position_time' => null,
             ]);

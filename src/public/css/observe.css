@@ -152,3 +152,9 @@ th {
 .btn-windows:active {
     background: rgba(255,255,255,0.12);
 }
+
+.offline-character td {
+    text-decoration: line-through;
+    opacity: 0.45;
+    color: #aaa;
+}

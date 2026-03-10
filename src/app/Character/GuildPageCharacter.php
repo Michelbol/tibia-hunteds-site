@@ -16,6 +16,7 @@ class GuildPageCharacter {
     public bool $is_online;
     public string $guild_name;
     public ?Carbon $online_at = null;
+    public ?Carbon $offline_at = null;
 
     public function getJoiningDateFormated(): string {
         return $this->joining_date->format('M d Y');
@@ -53,6 +54,7 @@ class GuildPageCharacter {
         if ($this->online_at !== null) {
             $array['online_at'] = $this->online_at;
         }
+        $array['offline_at'] = $this->offline_at;
         return $array;
     }
 }

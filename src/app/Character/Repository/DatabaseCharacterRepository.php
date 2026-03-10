@@ -10,7 +10,10 @@ class DatabaseCharacterRepository implements CharacterRepository {
 
     public function getOnlinePlayer(?string $guildName = null): Collection {
         $query = Character::query()
-        ->where('is_online', true);
+            ->where(function ($q) {
+                $q->where('is_online', true)
+                  ->orWhere('offline_at', '>=', now()->subMinutes(15));
+            });
 
         if (!is_null($guildName)) {
             $query->where('guild_name', $guildName);
@@ -34,7 +37,7 @@ class DatabaseCharacterRepository implements CharacterRepository {
         Character::upsert(
             $characters->toArray(),
             ['name'],
-            ['name', 'vocation', 'level', 'joining_date', 'is_online', 'guild_name', 'online_at'],
+            ['name', 'vocation', 'level', 'joining_date', 'is_online', 'guild_name', 'online_at', 'offline_at'],
         );
     }
 
