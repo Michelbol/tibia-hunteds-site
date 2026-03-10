@@ -71,9 +71,11 @@ jobs:
             cd /var/www/tibia-hunteds-site
             git fetch --all
             git reset --hard ${{ github.sha }}
+            cd /var/www/tibia-hunteds-site/src
             composer install --no-dev --optimize-autoloader --no-interaction --no-ansi
             php artisan migrate --force
             php artisan config:cache
             php artisan route:cache
             php artisan view:cache
-            sudo systemctl restart world-scraper.service schedule-run.service
+            sudo systemctl restart world-scraper.service
+            sudo systemctl restart schedule-run.service
