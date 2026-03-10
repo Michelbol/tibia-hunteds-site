@@ -92,46 +92,64 @@ function renderVocationImg(vocation) {
     }
 }
 
-function addRow(tableId, index, character) {
+function addRow(tableId, index, character, isOffline = false) {
     const tbody = document.querySelector(`#${tableId} tbody`);
     const row = document.createElement('tr');
-    row.className = 'vocation-tr';
-    const createdAtDate = serverDate(character.online_at+ " UTC");
-    const positionAtDate = character.position_time !== null ? serverDate(character.position_time+ " UTC") : null;
-    createdAtMap.set(`created-at-${tableId}-${index}`, createdAtDate);
-    positionTimeMap.set(`position-time-${tableId}-${index}`, positionAtDate);
-
     const imgVocation = renderVocationImg(character.vocation);
-    row.innerHTML = `
-        <td>#${index + 1}</td>
-        <td>${character.name}</td>
-        <td>${character.level}</td>
-        <td>${imgVocation}<span class="vocation-text">${character.vocation}</span></td>
-        <td id="created-at-${tableId}-${index}" class="normal">00:00:00</td>
-        <td id="position-time-${tableId}-${index}" class="normal"></td>
-        <td id="position" class="normal">${character.position ?? ''}</td>
-      `;
 
-    row.style.cursor = "pointer";
-    row.title = `Clique para copiar: exiva "${character.name}"`;
-    if (character.is_attacker_character) {
-        row.className = 'attack-character';
+    if (isOffline) {
+        row.className = 'offline-character';
+        const offlineAt = serverDate(character.offline_at + " UTC");
+        const offlineId = `offline-at-${tableId}-${character.name.replace(/\s+/g, '-')}`;
+
+        row.innerHTML = `
+            <td>#-</td>
+            <td>${character.name}</td>
+            <td>${character.level}</td>
+            <td>${imgVocation}<span class="vocation-text">${character.vocation}</span></td>
+            <td id="${offlineId}" class="normal">00:00:00</td>
+            <td class="normal"></td>
+            <td class="normal"></td>
+        `;
+        createdAtMap.set(offlineId, offlineAt);
+    } else {
+        row.className = 'vocation-tr';
+        const createdAtDate = serverDate(character.online_at+ " UTC");
+        const positionAtDate = character.position_time !== null ? serverDate(character.position_time+ " UTC") : null;
+        createdAtMap.set(`created-at-${tableId}-${index}`, createdAtDate);
+        positionTimeMap.set(`position-time-${tableId}-${index}`, positionAtDate);
+
+        row.innerHTML = `
+            <td>#${index + 1}</td>
+            <td>${character.name}</td>
+            <td>${character.level}</td>
+            <td>${imgVocation}<span class="vocation-text">${character.vocation}</span></td>
+            <td id="created-at-${tableId}-${index}" class="normal">00:00:00</td>
+            <td id="position-time-${tableId}-${index}" class="normal"></td>
+            <td id="position" class="normal">${character.position ?? ''}</td>
+        `;
+
+        if (character.is_attacker_character) {
+            row.className = 'attack-character';
+        }
+
+        row.style.cursor = "pointer";
+        row.title = `Clique para copiar: exiva "${character.name}"`;
+        row.addEventListener("click", () => {
+            const text = `exiva "${character.name}"`;
+            copyToClipboard(text);
+            showCopyToast(`Copiado: ${text}`);
+        });
+        row.addEventListener("contextmenu", (event) => {
+            if (!contextMenu) return;
+            event.preventDefault();
+            contextMenuTarget = character;
+            contextMenu.style.top = `${event.pageY}px`;
+            contextMenu.style.left = `${event.pageX}px`;
+            contextMenu.style.display = "block";
+            document.getElementById('input-position').focus();
+        });
     }
-
-    row.addEventListener("click", () => {
-        const text = `exiva "${character.name}"`;
-        copyToClipboard(text);
-        showCopyToast(`Copiado: ${text}`);
-    });
-    row.addEventListener("contextmenu", (event) => {
-        if (!contextMenu) return;
-        event.preventDefault();
-        contextMenuTarget = character;
-        contextMenu.style.top = `${event.pageY}px`;
-        contextMenu.style.left = `${event.pageX}px`;
-        contextMenu.style.display = "block";
-        document.getElementById('input-position').focus();
-    });
 
     tbody.appendChild(row);
 }
@@ -261,15 +279,22 @@ async function fetchOnlineCharacters() {
         createdAtMap.clear();
         positionTimeMap.clear();
 
-        const sortedCharacters = data.onlineCharacters.sort((a, b) => {
-            const timeA = serverDate() - serverDate(a.online_at+ " UTC");
-            const timeB = serverDate() - serverDate(b.online_at+ " UTC");
-            return timeA - timeB; // ordem crescente: menor tempo online primeiro
-        });
+        const onlineCharacters = data.onlineCharacters
+            .filter(c => c.is_online)
+            .sort((a, b) => {
+                const timeA = serverDate() - serverDate(a.online_at + " UTC");
+                const timeB = serverDate() - serverDate(b.online_at + " UTC");
+                return timeA - timeB;
+            });
+        const offlineCharacters = data.onlineCharacters
+            .filter(c => !c.is_online)
+            .sort((a, b) => {
+                return serverDate(b.offline_at + " UTC") - serverDate(a.offline_at + " UTC");
+            });
 
         let mainIndex = 0, bombaIndex = 0, bombaoIndex = 0, makerIndex = 0;
 
-        sortedCharacters.forEach(character => {
+        onlineCharacters.forEach(character => {
             if (character.type === 'main') {
                 addRow('mainCharTable', mainIndex++, character);
             } else if (character.type === 'bomba') {
@@ -281,12 +306,20 @@ async function fetchOnlineCharacters() {
             }
         });
 
+        offlineCharacters.forEach(character => {
+            const tableId = character.type === 'main' ? 'mainCharTable'
+                : character.type === 'bomba' ? 'bombasTable'
+                : character.type === 'bombao' ? 'bombaoTable'
+                : 'makersTable';
+            addRow(tableId, -1, character, true);
+        });
+
         document.getElementById('lastUpdate').textContent =
             `Atualizado em: ${serverDate().toLocaleTimeString()}`;
 
         updateCreatedAtTimers();
         updatePositionTimeTimers();
-        document.title = sortedCharacters.length + ' Characters Online';
+        document.title = onlineCharacters.length + ' Characters Online';
     } catch (error) {
         console.error('Erro ao buscar personagens:', error);
     } finally {

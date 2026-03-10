@@ -4,7 +4,7 @@
 @extends('layouts.default')
 
 @push('css')
-    <link rel="stylesheet" href="{{ asset('css/observe.css?v=202601272129') }}">
+    <link rel="stylesheet" href="{{ asset('css/observe.css?v=202603100000') }}">
 @endpush
 
 @section('content')
@@ -164,6 +164,6 @@
     <script>
         window.SERVER_TIME = "{{ now()->format('Y-m-d H:i:s') }}";
     </script>
-    <script src="{{ asset('js/observe.js?v=202601272129') }}"></script>
+    <script src="{{ asset('js/observe.js?v=202603100000') }}"></script>
 
 @endsection
