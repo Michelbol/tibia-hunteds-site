@@ -26,7 +26,13 @@ class HomeController extends Controller {
 
     public function getOnlineCharacters(Request $request): JsonResponse {
         $guildName = $request->get('guild_name');
-        return response()->json(['onlineCharacters' => $this->characterService->retrieveOnlinePlayers($guildName)]);
+        $characters = $this->characterService->retrieveOnlinePlayers($guildName);
+
+        if (!$request->user()) {
+            $characters = $characters->filter(fn($c) => $c->is_online)->values();
+        }
+
+        return response()->json(['onlineCharacters' => $characters]);
     }
 
     public function setCharacterType(string $characterName, string $type): JsonResponse {
