@@ -99,7 +99,7 @@ function addRow(tableId, index, character, isOffline = false) {
 
     if (isOffline) {
         row.className = 'offline-character';
-        const offlineAt = serverDate(character.offline_at + " UTC");
+        const offlineAt = new Date(character.offline_at);
         const offlineId = `offline-at-${tableId}-${character.name.replace(/\s+/g, '-')}`;
 
         row.innerHTML = `
