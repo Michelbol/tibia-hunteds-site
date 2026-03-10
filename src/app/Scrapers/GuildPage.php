@@ -61,6 +61,10 @@ class GuildPage {
                 continue;
             }
 
+            if ($guildPageTrIterator->getElementByTagName('td')->count() !== 6) {
+                continue;
+            }
+
             try {
                 $guildPageCharacter = $guildPageTrIterator->buildGuildPageCharacter($this->guildName);
                 $databaseCharacter = $guildPageTrIterator->findDatabaseCharacter($guildCharacters);
