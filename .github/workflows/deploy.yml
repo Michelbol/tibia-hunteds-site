@@ -54,8 +54,8 @@ jobs:
           key: ${{ secrets.DEPLOY_SSH_KEY_FRONT }}
           script: |
             cd /var/www/tibia-hunteds-site
-            git fetch --all
-            git reset --hard ${{ github.sha }}
+            git fetch origin main
+            git reset --hard origin/main
             docker exec app_web-app-1 composer install --no-dev --optimize-autoloader --no-interaction --no-ansi
             docker exec app_web-app-1 php artisan config:cache
             docker exec app_web-app-1 php artisan route:cache
@@ -69,8 +69,8 @@ jobs:
           key: ${{ secrets.DEPLOY_SSH_KEY_CRAWLER }}
           script: |
             cd /var/www/tibia-hunteds-site
-            git fetch --all
-            git reset --hard ${{ github.sha }}
+            git fetch origin main
+            git reset --hard origin/main
             cd /var/www/tibia-hunteds-site/src
             composer install --no-dev --optimize-autoloader --no-interaction --no-ansi
             php artisan migrate --force
