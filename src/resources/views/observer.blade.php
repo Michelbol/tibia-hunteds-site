@@ -13,6 +13,7 @@
     <div>
         @if(Auth::hasUser() && Auth::user()->super_admin)
             <a href="{{ route('settings') }}" class="btn-windows" target="_blank">Configurações</a>
+            <a href="{{ route('users.index') }}" class="btn-windows" target="_blank">Usuários</a>
         @endif
         <input readonly disabled name="guild_name" id="guild-name" value="{{ ucfirst($guildName->value) }}">
         <select id="soundSelect" onchange="playSelectedSoundNTimes(1, this.value)">
