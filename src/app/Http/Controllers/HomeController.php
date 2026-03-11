@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\ExecutionCrawler;
 use App\Setting\SettingService;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -79,5 +80,15 @@ class HomeController extends Controller {
 
     public function refil(): View {
         return view('refil');
+    }
+
+    public function healthcheck(): JsonResponse {
+        $lastExecution = ExecutionCrawler::latest()->first();
+
+        if ($lastExecution && $lastExecution->created_at->diffInSeconds(now()) < 60) {
+            return response()->json(['status' => 'ok'], 200);
+        }
+
+        return response()->json(['status' => 'error'], 500);
     }
 }

@@ -3,6 +3,7 @@
 namespace Tests\Feature\App\Http\Controllers;
 
 use App\Models\Character;
+use App\Models\ExecutionCrawler;
 use App\Models\Setting;
 use App\Models\User;
 use App\Setting\SettingConfig;
@@ -127,5 +128,30 @@ class HomeControllerTest extends TestCase {
 
         $response->assertStatus(200);
         $response->assertViewIs('refil');
+    }
+
+    public function testHealthcheck_WhenLastExecutionWasLessThanOneMinuteAgo_ShouldReturn200(): void {
+        ExecutionCrawler::factory()->recentExecution()->create();
+
+        $response = $this->getJson(route('healthcheck'));
+
+        $response->assertStatus(200);
+        $response->assertJson(['status' => 'ok']);
+    }
+
+    public function testHealthcheck_WhenLastExecutionWasMoreThanOneMinuteAgo_ShouldReturn500(): void {
+        ExecutionCrawler::factory()->outdatedExecution()->create();
+
+        $response = $this->getJson(route('healthcheck'));
+
+        $response->assertStatus(500);
+        $response->assertJson(['status' => 'error']);
+    }
+
+    public function testHealthcheck_WhenNoCrawlerExecutionExists_ShouldReturn500(): void {
+        $response = $this->getJson(route('healthcheck'));
+
+        $response->assertStatus(500);
+        $response->assertJson(['status' => 'error']);
     }
 }
