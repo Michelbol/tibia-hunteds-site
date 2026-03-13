@@ -215,6 +215,90 @@ class GuildPageTest extends TestCase {
         $this->assertNull(Character::where('name', 'Ghost Player')->first());
     }
 
+    public function testScrap_WithMultipleCharacters_ShouldCorrectlyMarkOnlineAndOffline(): void {
+        Carbon::setTestNow(Carbon::now());
+        $onlineChar = new GuildPageCharacter();
+        $onlineChar->rank = 'Leader';
+        $onlineChar->name = 'Online Player';
+        $onlineChar->vocation = VocationEnum::EK;
+        $onlineChar->level = '500';
+        $onlineChar->joining_date = Carbon::now();
+        $onlineChar->is_online = true;
+
+        $offlineChar = new GuildPageCharacter();
+        $offlineChar->rank = 'Member';
+        $offlineChar->name = 'Offline Player';
+        $offlineChar->vocation = VocationEnum::MS;
+        $offlineChar->level = '300';
+        $offlineChar->joining_date = Carbon::now();
+        $offlineChar->is_online = false;
+
+        Character::factory()->create(['name' => $onlineChar->name, 'guild_name' => GuildEnum::OUTLAW->value, 'is_online' => false]);
+        $offlineDbChar = Character::factory()->create(['name' => $offlineChar->name, 'guild_name' => GuildEnum::OUTLAW->value, 'is_online' => true]);
+
+        $html = GuildPageHtml::listOfMultipleCharacters([$onlineChar, $offlineChar]);
+
+        GuildPage::getInstance($html, GuildEnum::OUTLAW->value)->scrap();
+
+        $this->assertTrue(Character::where('name', $onlineChar->name)->first()->is_online);
+        $offlineDbChar->refresh();
+        $this->assertFalse($offlineDbChar->is_online);
+    }
+
+    public function testGetOnlineCharacters_AfterScrap_ShouldReturnCorrectCount(): void {
+        Carbon::setTestNow(Carbon::now());
+        $char1 = new GuildPageCharacter();
+        $char1->rank = 'Leader';
+        $char1->name = 'Player One';
+        $char1->vocation = VocationEnum::EK;
+        $char1->level = '500';
+        $char1->joining_date = Carbon::now();
+        $char1->is_online = true;
+
+        $char2 = new GuildPageCharacter();
+        $char2->rank = 'Member';
+        $char2->name = 'Player Two';
+        $char2->vocation = VocationEnum::MS;
+        $char2->level = '300';
+        $char2->joining_date = Carbon::now();
+        $char2->is_online = true;
+
+        Character::factory()->create(['name' => $char1->name, 'guild_name' => GuildEnum::OUTLAW->value, 'is_online' => false]);
+        Character::factory()->create(['name' => $char2->name, 'guild_name' => GuildEnum::OUTLAW->value, 'is_online' => false]);
+
+        $html = GuildPageHtml::listOfMultipleCharacters([$char1, $char2]);
+        $guildPage = GuildPage::getInstance($html, GuildEnum::OUTLAW->value)->scrap();
+
+        $this->assertEquals(2, $guildPage->getOnlineCharacters());
+    }
+
+    public function testGetOfflineCharacters_AfterScrap_ShouldReturnCorrectCount(): void {
+        Carbon::setTestNow(Carbon::now());
+        $onlineChar = new GuildPageCharacter();
+        $onlineChar->rank = 'Leader';
+        $onlineChar->name = 'Online One';
+        $onlineChar->vocation = VocationEnum::EK;
+        $onlineChar->level = '500';
+        $onlineChar->joining_date = Carbon::now();
+        $onlineChar->is_online = true;
+
+        $offlineChar = new GuildPageCharacter();
+        $offlineChar->rank = 'Member';
+        $offlineChar->name = 'Offline One';
+        $offlineChar->vocation = VocationEnum::MS;
+        $offlineChar->level = '300';
+        $offlineChar->joining_date = Carbon::now();
+        $offlineChar->is_online = false;
+
+        Character::factory()->create(['name' => $onlineChar->name, 'guild_name' => GuildEnum::OUTLAW->value, 'is_online' => false]);
+        Character::factory()->create(['name' => $offlineChar->name, 'guild_name' => GuildEnum::OUTLAW->value, 'is_online' => false]);
+
+        $html = GuildPageHtml::listOfMultipleCharacters([$onlineChar, $offlineChar]);
+        $guildPage = GuildPage::getInstance($html, GuildEnum::OUTLAW->value)->scrap();
+
+        $this->assertEquals(1, $guildPage->getOfflineCharacters());
+    }
+
     public function testScrap_WhenPlayerIsOnlineInDatabase_AndDidntExistsInHtml_ShouldMarkAsOfflineAndDeleteFromDatabase() {
         Carbon::setTestNow($expectedOnlineAt = Carbon::now());
         $guildPageCharacter = new GuildPageCharacter();
