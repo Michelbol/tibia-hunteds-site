@@ -2,6 +2,7 @@
 
 namespace App\Console\Commands;
 
+use App\Events\OnlineCharactersUpdated;
 use App\Models\ExecutionCrawler;
 use App\Scrapers\GuildPage;
 use App\Setting\SettingService;
@@ -33,6 +34,7 @@ class WorldScraper extends Command {
             $url = 'https://www.tibia.com/community/?' . http_build_query($params);
             $html = $this->dispatchRequest($url);
             $guildPage = $this->scrapPage($html, $searchGuild);
+            OnlineCharactersUpdated::dispatch($guildPage->onlineCharacters, $searchGuild);
 
             $globalExecutionEnd = microtime(true);
             $executionTime = $globalExecutionEnd - $globalExecutionBegin;
@@ -100,7 +102,7 @@ class WorldScraper extends Command {
         $executionCrawler->save();
     }
 
-    private function dispatchRequest(string $url): string {
+    protected function dispatchRequest(string $url): string {
         $requestTimeBegin = microtime(true);
         $ch = curl_init();
 
