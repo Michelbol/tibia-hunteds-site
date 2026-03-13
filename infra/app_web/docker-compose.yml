@@ -83,8 +83,6 @@ services:
         - REVERB_PORT=${REVERB_PORT}
         - REVERB_SCHEME=${REVERB_SCHEME}
         - XDEBUG_MODE=off
-      ports:
-        - "${REVERB_PORT:-8080}:8080"
       networks:
         - laravel
       restart: always
