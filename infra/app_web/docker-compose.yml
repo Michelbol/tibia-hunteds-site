@@ -57,6 +57,35 @@ services:
       networks:
         - laravel
       restart: always
+  reverb:
+      build:
+        context: ./php
+      image: michelbolzon/tibia-scrapper-app:latest
+      volumes:
+        - ./../../src:/var/www/html
+      command: php artisan reverb:start --host=0.0.0.0
+      environment:
+        - DB_CONNECTION=${DB_CONNECTION}
+        - DB_HOST=${DB_HOST}
+        - DB_PORT=${DB_PORT}
+        - DB_DATABASE=${DB_DATABASE}
+        - DB_USERNAME=${DB_USERNAME}
+        - DB_PASSWORD=${DB_PASSWORD}
+        - APP_ENV=${APP_ENV}
+        - APP_DEBUG=${APP_DEBUG}
+        - APP_URL=${APP_URL}
+        - APP_KEY=${APP_KEY}
+        - BROADCAST_CONNECTION=${BROADCAST_CONNECTION}
+        - REVERB_APP_ID=${REVERB_APP_ID}
+        - REVERB_APP_KEY=${REVERB_APP_KEY}
+        - REVERB_APP_SECRET=${REVERB_APP_SECRET}
+        - REVERB_HOST=${REVERB_HOST}
+        - REVERB_PORT=${REVERB_PORT}
+        - REVERB_SCHEME=${REVERB_SCHEME}
+        - XDEBUG_MODE=off
+      networks:
+        - laravel
+      restart: always
 networks:
   laravel:
     driver: bridge

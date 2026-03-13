@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <title>Reverb WebSocket Test</title>
+    <script src="https://js.pusher.com/8.2.0/pusher.min.js"></script>
+    <style>
+        body { font-family: monospace; background: #1a1a1a; color: #e0e0e0; padding: 2rem; max-width: 700px; margin: 0 auto; }
+        h1 { color: #a78bfa; margin-bottom: 0.25rem; }
+        p.subtitle { color: #6b7280; margin-top: 0; margin-bottom: 2rem; }
+        label { display: block; color: #9ca3af; font-size: 0.8rem; margin-bottom: 0.25rem; }
+        input { width: 100%; box-sizing: border-box; background: #2d2d2d; border: 1px solid #404040; color: #e0e0e0; padding: 0.5rem; border-radius: 4px; font-family: monospace; margin-bottom: 1rem; }
+        .row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+        button { background: #7c3aed; color: white; border: none; padding: 0.6rem 1.5rem; border-radius: 4px; cursor: pointer; font-family: monospace; font-size: 1rem; }
+        button:hover { background: #6d28d9; }
+        button:disabled { background: #4b5563; cursor: not-allowed; }
+        #status-box { margin-top: 2rem; padding: 1rem; border-radius: 6px; border: 1px solid #404040; background: #2d2d2d; }
+        .status { display: flex; align-items: center; gap: 0.5rem; font-size: 1.1rem; margin-bottom: 0.5rem; }
+        .dot { width: 12px; height: 12px; border-radius: 50%; background: #6b7280; flex-shrink: 0; }
+        .dot.connecting { background: #f59e0b; animation: pulse 1s infinite; }
+        .dot.connected { background: #10b981; }
+        .dot.error { background: #ef4444; }
+        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
+        #log { margin-top: 1.5rem; }
+        #log h3 { color: #9ca3af; font-size: 0.85rem; margin-bottom: 0.5rem; }
+        #log-entries { background: #111; border: 1px solid #333; border-radius: 4px; padding: 0.75rem; min-height: 120px; max-height: 300px; overflow-y: auto; font-size: 0.8rem; }
+        .log-entry { margin-bottom: 0.25rem; }
+        .log-entry .time { color: #6b7280; }
+        .log-entry.ok .msg { color: #10b981; }
+        .log-entry.warn .msg { color: #f59e0b; }
+        .log-entry.err .msg { color: #ef4444; }
+        .log-entry.info .msg { color: #60a5fa; }
+    </style>
+</head>
+<body>
+    <h1>Reverb WebSocket Test</h1>
+    <p class="subtitle">Valida a conexão com o servidor Laravel Reverb no ambiente local.</p>
+
+    <div class="row">
+        <div>
+            <label>REVERB_HOST</label>
+            <input id="host" value="localhost">
+        </div>
+        <div>
+            <label>REVERB_PORT</label>
+            <input id="port" value="8081">
+        </div>
+    </div>
+    <div>
+        <label>REVERB_APP_KEY</label>
+        <input id="appKey" value="my-app-key">
+    </div>
+
+    <button id="btn-connect" onclick="connect()">Conectar</button>
+    <button id="btn-disconnect" onclick="disconnect()" disabled>Desconectar</button>
+
+    <div id="status-box">
+        <div class="status">
+            <div class="dot" id="dot"></div>
+            <span id="status-text">Aguardando conexão...</span>
+        </div>
+        <div id="state-detail" style="color:#6b7280; font-size:0.8rem;"></div>
+    </div>
+
+    <div id="log">
+        <h3>LOG DE EVENTOS</h3>
+        <div id="log-entries"></div>
+    </div>
+
+    <script>
+        let pusher = null;
+
+        function log(msg, type = 'info') {
+            const el = document.getElementById('log-entries');
+            const time = new Date().toLocaleTimeString('pt-BR');
+            el.innerHTML += `<div class="log-entry ${type}"><span class="time">[${time}]</span> <span class="msg">${msg}</span></div>`;
+            el.scrollTop = el.scrollHeight;
+        }
+
+        function setStatus(label, dotClass, detail = '') {
+            document.getElementById('dot').className = 'dot ' + dotClass;
+            document.getElementById('status-text').textContent = label;
+            document.getElementById('state-detail').textContent = detail;
+        }
+
+        function connect() {
+            const host    = document.getElementById('host').value.trim();
+            const port    = parseInt(document.getElementById('port').value.trim());
+            const appKey  = document.getElementById('appKey').value.trim();
+
+            if (pusher) pusher.disconnect();
+
+            log(`Conectando em ws://${host}:${port} com app key "${appKey}"...`, 'info');
+            setStatus('Conectando...', 'connecting');
+
+            Pusher.logToConsole = true;
+
+            pusher = new Pusher(appKey, {
+                wsHost:           host,
+                wsPort:           port,
+                wssPort:          port,
+                forceTLS:         false,
+                enabledTransports: ['ws'],
+                cluster:          '',
+            });
+
+            pusher.connection.bind('connecting', () => {
+                setStatus('Conectando...', 'connecting', `ws://${host}:${port}`);
+                log('Estado: connecting', 'warn');
+            });
+
+            pusher.connection.bind('connected', () => {
+                setStatus('Conectado!', 'connected', `Socket ID: ${pusher.connection.socket_id}`);
+                log(`Conectado com sucesso! Socket ID: ${pusher.connection.socket_id}`, 'ok');
+                document.getElementById('btn-connect').disabled = true;
+                document.getElementById('btn-disconnect').disabled = false;
+
+                const channel = pusher.subscribe('test-channel');
+                channel.bind('pusher:subscription_succeeded', () => log('Inscrito no canal "test-channel"', 'ok'));
+            });
+
+            pusher.connection.bind('error', (err) => {
+                const msg = err?.error?.data?.message || JSON.stringify(err);
+                setStatus('Erro de conexão', 'error', msg);
+                log(`Erro: ${msg}`, 'err');
+            });
+
+            pusher.connection.bind('disconnected', () => {
+                setStatus('Desconectado', '', '');
+                log('Conexão encerrada.', 'warn');
+                document.getElementById('btn-connect').disabled = false;
+                document.getElementById('btn-disconnect').disabled = true;
+            });
+
+            pusher.connection.bind('unavailable', () => {
+                setStatus('Servidor indisponível', 'error', `Verifique se o container reverb está rodando na porta ${port}`);
+                log(`Servidor indisponível em ${host}:${port}`, 'err');
+            });
+
+            pusher.connection.bind('failed', () => {
+                setStatus('Falha na conexão', 'error', 'WebSocket não suportado ou servidor inacessível');
+                log('Falha: não foi possível estabelecer conexão', 'err');
+            });
+        }
+
+        function disconnect() {
+            if (pusher) {
+                pusher.disconnect();
+                pusher = null;
+            }
+        }
+    </script>
+</body>
+</html>
