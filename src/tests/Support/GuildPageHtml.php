@@ -55,6 +55,94 @@ HTML;
 HTML;
     }
 
+    public static function listOfMultipleCharacters(array $characters): string {
+        $rows = implode('', array_map(fn($c) => self::buildCharacterRow($c), $characters));
+        $html = <<<HTML
+        <div id="guilds">
+            <div class="TableContainer">
+                <table class="TableContent">
+                    <tr class="LabelH">
+                        <td>Rank</td>
+                        <td>Name and Title</td>
+                        <td>Vocation</td>
+                        <td>Level</td>
+                        <td>Joining Date</td>
+                        <td>Status</td>
+                    </tr>
+                    $rows
+                </table>
+            </div>
+        </div>
+HTML;
+        return $html;
+    }
+
+    public static function onlyLabelHRow(): string {
+        return <<<HTML
+        <div id="guilds">
+            <div class="TableContainer">
+                <table class="TableContent">
+                    <tr class="LabelH">
+                        <td>Rank</td>
+                        <td>Name and Title</td>
+                        <td>Vocation</td>
+                        <td>Level</td>
+                        <td>Joining Date</td>
+                        <td>Status</td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+HTML;
+    }
+
+    public static function withDoNotBreakRow(): string {
+        return <<<HTML
+        <div id="guilds">
+            <div class="TableContainer">
+                <table class="TableContent">
+                    <tr class="LabelH">
+                        <td>Rank</td><td>Name</td><td>Vocation</td><td>Level</td><td>Joining Date</td><td>Status</td>
+                    </tr>
+                    <tr>
+                        <td class="DoNotBreak">Invited Character</td>
+                        <td>col2</td><td>col3</td><td>col4</td><td>col5</td><td>col6</td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+HTML;
+    }
+
+    public static function withNoInvitedCharactersText(): string {
+        return <<<HTML
+        <div id="guilds">
+            <div class="TableContainer">
+                <table class="TableContent">
+                    <tr class="LabelH">
+                        <td>Rank</td><td>Name</td><td>Vocation</td><td>Level</td><td>Joining Date</td><td>Status</td>
+                    </tr>
+                    <tr bgcolor="#F1E0C6">
+                        <td>No invited characters</td>
+                        <td>col2</td><td>col3</td><td>col4</td><td>col5</td><td>col6</td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+HTML;
+    }
+
+    public static function emptyTable(): string {
+        return <<<HTML
+        <div id="guilds">
+            <div class="TableContainer">
+                <table class="TableContent">
+                </table>
+            </div>
+        </div>
+HTML;
+    }
+
     public static function listOfCharactersWithInvalidTdCount(): string {
         $invalidRow = '<tr bgcolor="#F1E0C6"><td>Leader</td><td>Only Four</td><td>Knight</td><td>100</td></tr>';
         $html = <<<HTML
