@@ -34,7 +34,7 @@
 </head>
 <body>
     <h1>Reverb WebSocket Test</h1>
-    <p class="subtitle">Valida a conexão com o servidor Laravel Reverb no ambiente local.</p>
+    <p class="subtitle">Valida a conexão com o servidor Laravel Reverb.</p>
 
     <div class="row">
         <div>
@@ -46,9 +46,18 @@
             <input id="port" value="8081">
         </div>
     </div>
-    <div>
-        <label>REVERB_APP_KEY</label>
-        <input id="appKey" value="my-app-key">
+    <div class="row">
+        <div>
+            <label>REVERB_APP_KEY</label>
+            <input id="appKey" value="my-app-key">
+        </div>
+        <div>
+            <label>TLS (wss://)</label>
+            <select id="forceTls" style="width:100%;box-sizing:border-box;background:#2d2d2d;border:1px solid #404040;color:#e0e0e0;padding:0.5rem;border-radius:4px;font-family:monospace;margin-bottom:1rem;">
+                <option value="false">Não (ws:// — local)</option>
+                <option value="true">Sim (wss:// — produção HTTPS)</option>
+            </select>
+        </div>
     </div>
 
     <button id="btn-connect" onclick="connect()">Conectar</button>
@@ -84,13 +93,15 @@
         }
 
         function connect() {
-            const host    = document.getElementById('host').value.trim();
-            const port    = parseInt(document.getElementById('port').value.trim());
-            const appKey  = document.getElementById('appKey').value.trim();
+            const host     = document.getElementById('host').value.trim();
+            const port     = parseInt(document.getElementById('port').value.trim());
+            const appKey   = document.getElementById('appKey').value.trim();
+            const forceTLS = document.getElementById('forceTls').value === 'true';
+            const scheme   = forceTLS ? 'wss' : 'ws';
 
             if (pusher) pusher.disconnect();
 
-            log(`Conectando em ws://${host}:${port} com app key "${appKey}"...`, 'info');
+            log(`Conectando em ${scheme}://${host}:${port} com app key "${appKey}"...`, 'info');
             setStatus('Conectando...', 'connecting');
 
             Pusher.logToConsole = true;
@@ -99,13 +110,13 @@
                 wsHost:           host,
                 wsPort:           port,
                 wssPort:          port,
-                forceTLS:         false,
-                enabledTransports: ['ws'],
+                forceTLS:         forceTLS,
+                enabledTransports: [forceTLS ? 'wss' : 'ws'],
                 cluster:          '',
             });
 
             pusher.connection.bind('connecting', () => {
-                setStatus('Conectando...', 'connecting', `ws://${host}:${port}`);
+                setStatus('Conectando...', 'connecting', `${scheme}://${host}:${port}`);
                 log('Estado: connecting', 'warn');
             });
 
