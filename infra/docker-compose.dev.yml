@@ -43,6 +43,14 @@ services:
       - ./../src:/var/www/html
     restart: no
 
+  reverb:
+    extends:
+      file: ./app_web/docker-compose.yml
+      service: reverb
+    volumes:
+      - ./../src:/var/www/html
+    restart: no
+
 networks:
   public:
   laravel:
