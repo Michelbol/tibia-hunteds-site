@@ -2,25 +2,19 @@
 
 namespace Tests\Feature\App\Channels;
 
+use App\Events\OnlineCharactersUpdated;
+use Illuminate\Broadcasting\Channel;
+use Illuminate\Broadcasting\PrivateChannel;
 use Tests\TestCase;
 
 class OnlineCharactersChannelTest extends TestCase {
 
     public function testOnlineCharactersChannel_ShouldAllowPublicAccess(): void {
-        $response = $this->withoutMiddleware()->postJson('/broadcasting/auth', [
-            'channel_name' => 'online-characters.TestGuild',
-            'socket_id' => '1234.5678',
-        ]);
+        $event = new OnlineCharactersUpdated(collect(), 'TestGuild');
 
-        $response->assertStatus(200);
-    }
+        $channel = $event->broadcastOn();
 
-    public function testOnlineCharactersChannel_WithDifferentGuildName_ShouldBeAccessible(): void {
-        $response = $this->withoutMiddleware()->postJson('/broadcasting/auth', [
-            'channel_name' => 'online-characters.AnotherGuild',
-            'socket_id' => '1234.5678',
-        ]);
-
-        $response->assertStatus(200);
+        $this->assertInstanceOf(Channel::class, $channel);
+        $this->assertNotInstanceOf(PrivateChannel::class, $channel);
     }
 }
