@@ -5,9 +5,12 @@ RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y \
     git \
     zip unzip \
     libzip-dev \
+    curl \
     && docker-php-ext-install pdo pdo_mysql zip pcntl \
     && pecl install xdebug \
     && docker-php-ext-enable xdebug \
+    && curl -fsSL https://deb.nodesource.com/setup_20.x | bash - \
+    && apt-get install -y nodejs \
     && rm -rf /var/lib/apt/lists/*
 
 # Instala Composer

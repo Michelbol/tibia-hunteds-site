@@ -41,6 +41,9 @@ services:
       service: world-scraper
     volumes:
       - ./../src:/var/www/html
+    environment:
+      REVERB_HOST: reverb
+      REVERB_PORT: 8080
     restart: no
 
   reverb:
