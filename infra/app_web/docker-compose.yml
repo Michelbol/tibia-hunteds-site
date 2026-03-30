@@ -31,6 +31,12 @@ services:
       - APP_URL=${APP_URL}
       - APP_KEY=${APP_KEY}
       - XDEBUG_MODE=off
+      - REVERB_APP_ID=${REVERB_APP_ID}
+      - REVERB_APP_KEY=${REVERB_APP_KEY}
+      - REVERB_APP_SECRET=${REVERB_APP_SECRET}
+      - REVERB_HOST=${REVERB_HOST}
+      - REVERB_PORT=${REVERB_PORT}
+      - REVERB_SCHEME=${REVERB_SCHEME}
     networks:
       - laravel
     restart: always
