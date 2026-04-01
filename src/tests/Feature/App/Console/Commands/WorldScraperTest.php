@@ -33,19 +33,13 @@ class WorldScraperStub extends WorldScraper {
 
 class WorldScraperTest extends TestCase {
 
-    public function tearDown(): void {
-        \Illuminate\Support\Facades\DB::statement('SET FOREIGN_KEY_CHECKS=0');
-        parent::tearDown();
-    }
 
     protected function setUp(): void {
         parent::setUp();
         Storage::fake('local');
         Cache::flush();
-        \Illuminate\Support\Facades\DB::statement('SET FOREIGN_KEY_CHECKS=0');
         \Illuminate\Support\Facades\DB::table('settings')->truncate();
         \Illuminate\Support\Facades\DB::table('characters')->truncate();
-        \Illuminate\Support\Facades\DB::statement('SET FOREIGN_KEY_CHECKS=1');
     }
 
     private function runStub(WorldScraperStub $stub): void {

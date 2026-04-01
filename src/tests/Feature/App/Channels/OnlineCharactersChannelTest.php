@@ -10,7 +10,7 @@ use Tests\TestCase;
 class OnlineCharactersChannelTest extends TestCase {
 
     public function testOnlineCharactersChannel_ShouldAllowPublicAccess(): void {
-        $event = new OnlineCharactersUpdated(collect(), 'TestGuild');
+        $event = new OnlineCharactersUpdated([], [], 'TestGuild');
 
         $channel = $event->broadcastOn();
 
