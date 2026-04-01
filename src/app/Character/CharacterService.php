@@ -73,4 +73,33 @@ readonly class CharacterService {
     public function findCharacterByName(string $name): ?Character {
         return $this->databaseCharacterRepository->firstCharacterByName($name);
     }
+
+    public function computeDiff(Collection $previous, Collection $current): array {
+        $previousByName = $previous->keyBy('name');
+        $currentByName = $current->keyBy('name');
+
+        $changes = $current->filter(function (array $character) use ($previousByName): bool {
+            $name = $character['name'];
+            if (!$previousByName->has($name)) {
+                return true;
+            }
+            return $this->characterHasChanged($previousByName->get($name), $character);
+        })->values()->toArray();
+
+        $removed = $previousByName->keys()
+            ->filter(fn(string $name) => !$currentByName->has($name))
+            ->values()
+            ->toArray();
+
+        return ['changes' => $changes, 'removed' => $removed];
+    }
+
+    private function characterHasChanged(array $previous, array $current): bool {
+        foreach (['is_online', 'position', 'position_time', 'level', 'type', 'is_attacker_character', 'online_at', 'offline_at'] as $field) {
+            if (($previous[$field] ?? null) !== ($current[$field] ?? null)) {
+                return true;
+            }
+        }
+        return false;
+    }
 }

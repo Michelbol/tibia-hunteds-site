@@ -2,12 +2,14 @@
 
 namespace App\Console\Commands;
 
+use App\Character\CharacterService;
 use App\Events\OnlineCharactersUpdated;
 use App\Models\ExecutionCrawler;
 use App\Scrapers\GuildPage;
 use App\Setting\SettingService;
 use Carbon\Carbon;
 use Illuminate\Console\Command;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Log;
 
 class WorldScraper extends Command {
@@ -16,6 +18,10 @@ class WorldScraper extends Command {
     protected $description = 'Guild Page Scraper';
     private float $requestTime;
     private float $scrapTime;
+
+    public function __construct(private readonly CharacterService $characterService) {
+        parent::__construct();
+    }
 
     public function handle(): void {
         try {
@@ -34,14 +40,21 @@ class WorldScraper extends Command {
             $url = 'https://www.tibia.com/community/?' . http_build_query($params);
             $html = $this->dispatchRequest($url);
             $guildPage = $this->scrapPage($html, $searchGuild);
-            OnlineCharactersUpdated::dispatch($guildPage->onlineCharacters, $searchGuild);
+            $characters = $this->characterService->retrieveOnlinePlayers($searchGuild);
+            $currentData = $characters->map(fn($c) => $c instanceof \App\Models\Character ? $c->toArray() : (array) $c)->values();
 
+            $cacheKey = "broadcast_state_{$searchGuild}";
+            $previous = collect(Cache::get($cacheKey, []));
+            $diff = $this->characterService->computeDiff($previous, $currentData);
+            Cache::put($cacheKey, $currentData->toArray(), now()->addMinute());
+
+            OnlineCharactersUpdated::dispatch($diff['changes'], $diff['removed'], $searchGuild);
             $globalExecutionEnd = microtime(true);
             $executionTime = $globalExecutionEnd - $globalExecutionBegin;
 
             $this->info('Guild Page Scraped Summary: '.Carbon::now()->toDateTimeString());
             $this->info('Total Characters: '. $guildPage->getOnlineCharacters()+$guildPage->getOfflineCharacters());
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
             $this->info('Error to execute: '.Carbon::now()->toDateTimeString());
             Log::info($e->getMessage());
         } finally {

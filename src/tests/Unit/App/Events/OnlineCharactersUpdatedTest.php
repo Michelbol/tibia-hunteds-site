@@ -4,46 +4,38 @@ namespace Tests\Unit\App\Events;
 
 use App\Events\OnlineCharactersUpdated;
 use Illuminate\Broadcasting\Channel;
-use Illuminate\Support\Collection;
 use PHPUnit\Framework\TestCase;
 
 class OnlineCharactersUpdatedTest extends TestCase {
 
-    public function testBroadcastOn_ShouldReturnPublicChannelWithGuildName(): void {
-        $event = new OnlineCharactersUpdated(collect([]), 'TestGuild');
+    public function testBroadcastOn_ShouldReturnPublicChannelWithFixedName(): void {
+        $event = new OnlineCharactersUpdated([], [], 'TestGuild');
 
         $channel = $event->broadcastOn();
 
         $this->assertInstanceOf(Channel::class, $channel);
-        $this->assertEquals('online-characters.TestGuild', $channel->name);
+        $this->assertEquals('online-characters', $channel->name);
     }
 
-    public function testBroadcastOn_ShouldIncludeGuildNameInChannelName(): void {
-        $event = new OnlineCharactersUpdated(collect([]), 'AnotherGuild');
-
-        $channel = $event->broadcastOn();
-
-        $this->assertEquals('online-characters.AnotherGuild', $channel->name);
-    }
-
-    public function testBroadcastWith_ShouldReturnOnlineCharactersKey(): void {
+    public function testBroadcastWith_ShouldReturnChangesAndRemovedKeys(): void {
         $character = ['name' => 'TestChar', 'is_online' => true, 'vocation' => 'Knight', 'level' => 100];
-        $event = new OnlineCharactersUpdated(collect([$character]), 'TestGuild');
+        $event = new OnlineCharactersUpdated([$character], [], 'TestGuild');
 
         $data = $event->broadcastWith();
 
-        $this->assertArrayHasKey('onlineCharacters', $data);
-        $this->assertCount(1, $data['onlineCharacters']);
-        $this->assertEquals('TestChar', $data['onlineCharacters'][0]['name']);
+        $this->assertArrayHasKey('changes', $data);
+        $this->assertArrayHasKey('removed', $data);
+        $this->assertCount(1, $data['changes']);
+        $this->assertEquals('TestChar', $data['changes'][0]['name']);
     }
 
-    public function testBroadcastWith_WhenEmptyCollection_ShouldReturnEmptyOnlineCharacters(): void {
-        $event = new OnlineCharactersUpdated(collect([]), 'TestGuild');
+    public function testBroadcastWith_WhenNoChanges_ShouldReturnEmptyArrays(): void {
+        $event = new OnlineCharactersUpdated([], [], 'TestGuild');
 
         $data = $event->broadcastWith();
 
-        $this->assertArrayHasKey('onlineCharacters', $data);
-        $this->assertEmpty($data['onlineCharacters']);
+        $this->assertEmpty($data['changes']);
+        $this->assertEmpty($data['removed']);
     }
 
     public function testBroadcastWith_ShouldIncludeAllCharacterFields(): void {
@@ -53,27 +45,38 @@ class OnlineCharactersUpdatedTest extends TestCase {
             'vocation' => 'Knight',
             'level' => 100,
         ];
-        $event = new OnlineCharactersUpdated(collect([$character]), 'TestGuild');
+        $event = new OnlineCharactersUpdated([$character], [], 'TestGuild');
 
         $data = $event->broadcastWith();
 
-        $charData = $data['onlineCharacters'][0];
+        $charData = $data['changes'][0];
         $this->assertEquals('TestChar', $charData['name']);
         $this->assertEquals('Knight', $charData['vocation']);
         $this->assertEquals(100, $charData['level']);
         $this->assertTrue($charData['is_online']);
     }
 
-    public function testBroadcastWith_ShouldPreserveMultipleCharacters(): void {
+    public function testBroadcastWith_ShouldPreserveMultipleChanges(): void {
         $characters = [
             ['name' => 'CharOne', 'is_online' => true],
             ['name' => 'CharTwo', 'is_online' => true],
             ['name' => 'CharThree', 'is_online' => false],
         ];
-        $event = new OnlineCharactersUpdated(collect($characters), 'TestGuild');
+        $event = new OnlineCharactersUpdated($characters, [], 'TestGuild');
 
         $data = $event->broadcastWith();
 
-        $this->assertCount(3, $data['onlineCharacters']);
+        $this->assertCount(3, $data['changes']);
+    }
+
+    public function testBroadcastWith_ShouldIncludeRemovedNames(): void {
+        $event = new OnlineCharactersUpdated([], ['CharX', 'CharY'], 'TestGuild');
+
+        $data = $event->broadcastWith();
+
+        $this->assertEmpty($data['changes']);
+        $this->assertCount(2, $data['removed']);
+        $this->assertContains('CharX', $data['removed']);
+        $this->assertContains('CharY', $data['removed']);
     }
 }

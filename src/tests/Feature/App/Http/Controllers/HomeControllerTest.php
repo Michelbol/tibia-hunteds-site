@@ -26,6 +26,32 @@ class HomeControllerTest extends TestCase {
         $response->assertViewIs('observer');
     }
 
+    public function testIndex_WhenSuperAdmin_ShouldIncludeViteAppScript(): void {
+        Setting::factory()->create(['name' => SettingConfig::GUILD_NAME->value, 'value' => 'TestGuild']);
+        $user = User::factory()->create(['super_admin' => true]);
+
+        $response = $this->actingAs($user)->get(route('home'));
+
+        $response->assertSee('<script type="module"', false);
+    }
+
+    public function testIndex_WhenNotSuperAdmin_ShouldNotIncludeViteAppScript(): void {
+        Setting::factory()->create(['name' => SettingConfig::GUILD_NAME->value, 'value' => 'TestGuild']);
+        $user = User::factory()->create(['super_admin' => false]);
+
+        $response = $this->actingAs($user)->get(route('home'));
+
+        $response->assertDontSee('<script type="module"', false);
+    }
+
+    public function testIndex_WhenUnauthenticated_ShouldNotIncludeViteAppScript(): void {
+        Setting::factory()->create(['name' => SettingConfig::GUILD_NAME->value, 'value' => 'TestGuild']);
+
+        $response = $this->get(route('home'));
+
+        $response->assertDontSee('<script type="module"', false);
+    }
+
     public function testGetOnlineCharacters_WhenUnauthenticated_ShouldReturnOnlyOnlineCharacters(): void {
         Character::factory()->create(['is_online' => true, 'offline_at' => null]);
         Character::factory()->create(['is_online' => false, 'offline_at' => now()->subMinutes(5)]);
