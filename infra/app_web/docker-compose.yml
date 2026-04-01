@@ -37,6 +37,10 @@ services:
       - REVERB_HOST=${REVERB_HOST}
       - REVERB_PORT=${REVERB_PORT}
       - REVERB_SCHEME=${REVERB_SCHEME}
+      - VITE_REVERB_APP_KEY=${VITE_REVERB_APP_KEY}
+      - VITE_REVERB_HOST=${VITE_REVERB_HOST}
+      - VITE_REVERB_PORT=${VITE_REVERB_PORT}
+      - VITE_REVERB_SCHEME=${VITE_REVERB_SCHEME}
     networks:
       - laravel
     restart: always
