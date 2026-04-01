@@ -46,9 +46,12 @@ class WorldScraper extends Command {
             $cacheKey = "broadcast_state_{$searchGuild}";
             $previous = collect(Cache::get($cacheKey, []));
             $diff = $this->characterService->computeDiff($previous, $currentData);
-            Cache::put($cacheKey, $currentData->toArray(), now()->addMinute());
+            Cache::put($cacheKey, $currentData->toArray(), now()->addMinutes(2));
 
-            OnlineCharactersUpdated::dispatch($diff['changes'], $diff['removed'], $searchGuild);
+            if ($this->shouldDispatch($diff, $searchGuild)) {
+                OnlineCharactersUpdated::dispatch($diff['changes'], $diff['removed'], $searchGuild);
+                Cache::put("last_broadcast_{$searchGuild}", Carbon::now()->timestamp, now()->addMinutes(2));
+            }
             $globalExecutionEnd = microtime(true);
             $executionTime = $globalExecutionEnd - $globalExecutionBegin;
 
@@ -91,6 +94,16 @@ class WorldScraper extends Command {
         }
         $this->info('Final Date: '.Carbon::now()->toDateTimeString());
         $this->info('===================================');
+    }
+
+    private function shouldDispatch(array $diff, string $guildName): bool {
+        $hasDiff = !empty($diff['changes']) || !empty($diff['removed']);
+        if ($hasDiff) {
+            return true;
+        }
+
+        $lastBroadcast = Cache::get("last_broadcast_{$guildName}");
+        return $lastBroadcast === null || Carbon::now()->timestamp - $lastBroadcast >= 60;
     }
 
     private function createExecutionCrawler(
