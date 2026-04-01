@@ -26,22 +26,13 @@ class HomeControllerTest extends TestCase {
         $response->assertViewIs('observer');
     }
 
-    public function testIndex_WhenSuperAdmin_ShouldIncludeViteAppScript(): void {
+    public function testIndex_WhenAuthenticated_ShouldIncludeViteAppScript(): void {
         Setting::factory()->create(['name' => SettingConfig::GUILD_NAME->value, 'value' => 'TestGuild']);
-        $user = User::factory()->create(['super_admin' => true]);
+        $user = User::factory()->create();
 
         $response = $this->actingAs($user)->get(route('home'));
 
         $response->assertSee('<script type="module"', false);
-    }
-
-    public function testIndex_WhenNotSuperAdmin_ShouldNotIncludeViteAppScript(): void {
-        Setting::factory()->create(['name' => SettingConfig::GUILD_NAME->value, 'value' => 'TestGuild']);
-        $user = User::factory()->create(['super_admin' => false]);
-
-        $response = $this->actingAs($user)->get(route('home'));
-
-        $response->assertDontSee('<script type="module"', false);
     }
 
     public function testIndex_WhenUnauthenticated_ShouldNotIncludeViteAppScript(): void {
