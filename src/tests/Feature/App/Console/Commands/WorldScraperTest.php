@@ -7,6 +7,7 @@ use App\Character\GuildPageCharacter;
 use App\Character\VocationEnum;
 use App\Console\Commands\WorldScraper;
 use App\Events\OnlineCharactersUpdated;
+use App\Scrapers\GuildPage;
 use App\Models\Character;
 use App\Models\Setting;
 use App\Setting\SettingConfig;
@@ -38,6 +39,7 @@ class WorldScraperTest extends TestCase {
         parent::setUp();
         Storage::fake('local');
         Cache::flush();
+        GuildPage::reset();
         \Illuminate\Support\Facades\DB::table('settings')->truncate();
         \Illuminate\Support\Facades\DB::table('characters')->truncate();
     }
@@ -112,6 +114,61 @@ class WorldScraperTest extends TestCase {
         $stub = $this->app->make(WorldScraperStub::class);
         $stub->setFakeHtml(GuildPageHtml::listOfCharacters($onlineCharacter));
         $this->runStub($stub);
+
+        Event::assertDispatched(OnlineCharactersUpdated::class, function (OnlineCharactersUpdated $event) use ($guildName) {
+            return $event->guildName === $guildName;
+        });
+    }
+
+    public function testHandle_WhenNoDiffAndNoTimeElapsed_ShouldNotDispatchEvent(): void {
+        $guildName = GuildEnum::OUTLAW->value;
+        Setting::factory()->create([
+            'name' => SettingConfig::GUILD_NAME->value,
+            'value' => $guildName,
+        ]);
+        $onlineCharacter = $this->makeOnlineCharacter($guildName);
+        Character::factory()->create([
+            'name' => $onlineCharacter->name,
+            'guild_name' => $guildName,
+            'is_online' => true,
+        ]);
+
+        $stub = $this->app->make(WorldScraperStub::class);
+        $stub->setFakeHtml(GuildPageHtml::listOfCharacters($onlineCharacter));
+        $this->runStub($stub); // first run: populates broadcast_state cache
+
+        // ShouldBroadcastNow may throw in test environment, preventing last_broadcast from being set
+        Cache::put("last_broadcast_{$guildName}", Carbon::now()->timestamp, now()->addMinutes(2));
+        Storage::fake('local'); // reset file cache so second run queries DB fresh
+
+        Event::fake();
+        $this->runStub($stub); // second run: no diff, less than 1 minute passed
+
+        Event::assertNotDispatched(OnlineCharactersUpdated::class);
+    }
+
+    public function testHandle_WhenNoDiffButOneMinutePassed_ShouldDispatchEvent(): void {
+        $guildName = GuildEnum::OUTLAW->value;
+        Setting::factory()->create([
+            'name' => SettingConfig::GUILD_NAME->value,
+            'value' => $guildName,
+        ]);
+        $onlineCharacter = $this->makeOnlineCharacter($guildName);
+        Character::factory()->create([
+            'name' => $onlineCharacter->name,
+            'guild_name' => $guildName,
+            'is_online' => true,
+        ]);
+
+        $stub = $this->app->make(WorldScraperStub::class);
+        $stub->setFakeHtml(GuildPageHtml::listOfCharacters($onlineCharacter));
+        $this->runStub($stub); // first run: populates broadcast_state cache
+
+        Storage::fake('local'); // reset file cache so second run queries DB fresh
+        Cache::put("last_broadcast_{$guildName}", Carbon::now()->subSeconds(60)->timestamp, now()->addMinutes(2));
+
+        Event::fake();
+        $this->runStub($stub); // second run: no diff, but 1 minute passed
 
         Event::assertDispatched(OnlineCharactersUpdated::class, function (OnlineCharactersUpdated $event) use ($guildName) {
             return $event->guildName === $guildName;
