@@ -37,8 +37,11 @@ jobs:
       - name: Run Seeders
         run: docker compose -f infra/app_web/docker-compose.yml exec -T app php artisan db:seed
 
-      - name: Run Npm
-        run: docker compose -f infra/app_web/docker-compose.yml exec -T app npm ci && npm run build
+      - name: Run Npm Install
+        run: docker compose -f infra/app_web/docker-compose.yml exec -T app npm ci
+
+      - name: Run Npm Build
+        run: docker compose -f infra/app_web/docker-compose.yml exec -T app npm run build
 
       - name: Run Tests with PHPUnit + Xdebug
         run: docker compose -f infra/app_web/docker-compose.yml exec -T app vendor/bin/phpunit --colors=never
