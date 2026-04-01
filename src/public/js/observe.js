@@ -16,6 +16,7 @@ let positionTimeMap = new Map();
 let lastPlayed = serverDate();
 let lastOnlineCount = 0;
 let isFetching = false;
+let charactersState = new Map();
 
 function formatToHHMMSS(seconds) {
     const h = String(Math.floor(seconds / 3600)).padStart(2, '0');
@@ -255,6 +256,77 @@ function copyToClipboard(text) {
     });
 }
 
+function processCharactersData(data) {
+    charactersState.clear();
+    data.onlineCharacters.forEach(c => charactersState.set(c.name, c));
+    renderFromState();
+}
+
+function applyDiff(event) {
+    event.changes.forEach(c => charactersState.set(c.name, c));
+    event.removed.forEach(name => charactersState.delete(name));
+    renderFromState();
+}
+
+function renderFromState() {
+    const allCharacters = [...charactersState.values()];
+
+    const charactersOnlineAtMinusThanOneMinute = allCharacters.filter(character => {
+        const now = serverDate();
+        const createdAtDate = serverDate(character.online_at + " UTC");
+        const diffInSec = Math.floor((now - createdAtDate) / 1000);
+        return diffInSec < 60 && character.level > 32;
+    });
+    handleCountIncreaseAndPlay(lastOnlineCount, charactersOnlineAtMinusThanOneMinute.length);
+    lastOnlineCount = charactersOnlineAtMinusThanOneMinute.length;
+
+    clearTables();
+    createdAtMap.clear();
+    positionTimeMap.clear();
+
+    const onlineCharacters = allCharacters
+        .filter(c => c.is_online)
+        .sort((a, b) => {
+            const timeA = serverDate() - serverDate(a.online_at + " UTC");
+            const timeB = serverDate() - serverDate(b.online_at + " UTC");
+            return timeA - timeB;
+        });
+    const offlineCharacters = allCharacters
+        .filter(c => !c.is_online)
+        .sort((a, b) => {
+            return serverDate(b.offline_at + " UTC") - serverDate(a.offline_at + " UTC");
+        });
+
+    let mainIndex = 0, bombaIndex = 0, bombaoIndex = 0, makerIndex = 0;
+
+    onlineCharacters.forEach(character => {
+        if (character.type === 'main') {
+            addRow('mainCharTable', mainIndex++, character);
+        } else if (character.type === 'bomba') {
+            addRow('bombasTable', bombaIndex++, character);
+        } else if (character.type === 'bombao') {
+            addRow('bombaoTable', bombaoIndex++, character);
+        } else {
+            addRow('makersTable', makerIndex++, character);
+        }
+    });
+
+    offlineCharacters.forEach(character => {
+        const tableId = character.type === 'main' ? 'mainCharTable'
+            : character.type === 'bomba' ? 'bombasTable'
+            : character.type === 'bombao' ? 'bombaoTable'
+            : 'makersTable';
+        addRow(tableId, -1, character, true);
+    });
+
+    document.getElementById('lastUpdate').textContent =
+        `Atualizado em: ${serverDate().toLocaleTimeString()}`;
+
+    updateCreatedAtTimers();
+    updatePositionTimeTimers();
+    document.title = onlineCharacters.length + ' Characters Online';
+}
+
 async function fetchOnlineCharacters() {
     if (isFetching) return;
     isFetching = true;
@@ -263,63 +335,7 @@ async function fetchOnlineCharacters() {
         let guildName = document.getElementById('guild-name').value;
         const response = await fetch('/get-online-characters?guild_name='+guildName);
         const data = await response.json();
-
-        const charactersOnlineAtMinusThanOneMinute = data.onlineCharacters.filter(character => {
-            const now = serverDate();
-            const createdAtDate = serverDate(character.online_at+ " UTC");
-            const diffInSec = Math.floor((now - createdAtDate) / 1000);
-            if (diffInSec < 60 && character.level > 32) {
-                return character;
-            }
-        });
-        handleCountIncreaseAndPlay(lastOnlineCount, charactersOnlineAtMinusThanOneMinute.length);
-
-        lastOnlineCount = charactersOnlineAtMinusThanOneMinute.length;
-        clearTables();
-        createdAtMap.clear();
-        positionTimeMap.clear();
-
-        const onlineCharacters = data.onlineCharacters
-            .filter(c => c.is_online)
-            .sort((a, b) => {
-                const timeA = serverDate() - serverDate(a.online_at + " UTC");
-                const timeB = serverDate() - serverDate(b.online_at + " UTC");
-                return timeA - timeB;
-            });
-        const offlineCharacters = data.onlineCharacters
-            .filter(c => !c.is_online)
-            .sort((a, b) => {
-                return serverDate(b.offline_at + " UTC") - serverDate(a.offline_at + " UTC");
-            });
-
-        let mainIndex = 0, bombaIndex = 0, bombaoIndex = 0, makerIndex = 0;
-
-        onlineCharacters.forEach(character => {
-            if (character.type === 'main') {
-                addRow('mainCharTable', mainIndex++, character);
-            } else if (character.type === 'bomba') {
-                addRow('bombasTable', bombaIndex++, character);
-            } else if (character.type === 'bombao') {
-                addRow('bombaoTable', bombaoIndex++, character);
-            } else {
-                addRow('makersTable', makerIndex++, character);
-            }
-        });
-
-        offlineCharacters.forEach(character => {
-            const tableId = character.type === 'main' ? 'mainCharTable'
-                : character.type === 'bomba' ? 'bombasTable'
-                : character.type === 'bombao' ? 'bombaoTable'
-                : 'makersTable';
-            addRow(tableId, -1, character, true);
-        });
-
-        document.getElementById('lastUpdate').textContent =
-            `Atualizado em: ${serverDate().toLocaleTimeString()}`;
-
-        updateCreatedAtTimers();
-        updatePositionTimeTimers();
-        document.title = onlineCharacters.length + ' Characters Online';
+        processCharactersData(data);
     } catch (error) {
         console.error('Erro ao buscar personagens:', error);
     } finally {
@@ -368,7 +384,24 @@ function startPolling() {
 setInterval(updateCreatedAtTimers, 1000);
 setInterval(updatePositionTimeTimers, 1000);
 fetchOnlineCharacters();
-startPolling();
+
+document.addEventListener('DOMContentLoaded', function () {
+    if (window.Echo) {
+        window.Echo.channel('online-characters')
+            .subscribed(() => {
+                console.log('[Broadcast] Conectado ao canal online-characters com sucesso.');
+            })
+            .error((error) => {
+                console.error('[Broadcast] Falha ao conectar ao canal online-characters:', error);
+            })
+            .listen('OnlineCharactersUpdated', (event) => {
+                console.log('[Broadcast] Dados recebidos, atualizando a tela:', event);
+                applyDiff(event);
+            });
+    } else {
+        startPolling();
+    }
+});
 
 // --- variáveis globais ---
 let audioContext = null;

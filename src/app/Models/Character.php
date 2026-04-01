@@ -37,7 +37,6 @@ class Character extends Model {
             'name' => $this->name,
             'vocation' => $this->vocation,
             'level' => $this->level,
-            'joining_date' => $this->joining_date,
             'type' => $this->type,
             'is_online' => $this->is_online,
             'online_at' => $this->online_at ? $this->online_at->format('Y-m-d H:i:s') : null,

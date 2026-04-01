@@ -11,7 +11,9 @@ use App\Models\Character;
 use App\Models\Setting;
 use App\Setting\SettingConfig;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Event;
+use Illuminate\Support\Facades\Storage;
 use Symfony\Component\Console\Input\ArrayInput;
 use Symfony\Component\Console\Output\NullOutput;
 use Tests\Support\GuildPageHtml;
@@ -30,6 +32,21 @@ class WorldScraperStub extends WorldScraper {
 }
 
 class WorldScraperTest extends TestCase {
+
+    public function tearDown(): void {
+        \Illuminate\Support\Facades\DB::statement('SET FOREIGN_KEY_CHECKS=0');
+        parent::tearDown();
+    }
+
+    protected function setUp(): void {
+        parent::setUp();
+        Storage::fake('local');
+        Cache::flush();
+        \Illuminate\Support\Facades\DB::statement('SET FOREIGN_KEY_CHECKS=0');
+        \Illuminate\Support\Facades\DB::table('settings')->truncate();
+        \Illuminate\Support\Facades\DB::table('characters')->truncate();
+        \Illuminate\Support\Facades\DB::statement('SET FOREIGN_KEY_CHECKS=1');
+    }
 
     private function runStub(WorldScraperStub $stub): void {
         $stub->setLaravel($this->app);
@@ -74,13 +91,13 @@ class WorldScraperTest extends TestCase {
             'is_online' => false,
         ]);
 
-        $stub = new WorldScraperStub();
+        $stub = $this->app->make(WorldScraperStub::class);
         $stub->setFakeHtml(GuildPageHtml::listOfCharacters($onlineCharacter));
         $this->runStub($stub);
 
         Event::assertDispatched(OnlineCharactersUpdated::class, function (OnlineCharactersUpdated $event) {
-            return $event->characters->count() === 1
-                && $event->characters->first()['name'] === 'TestCharacter';
+            return count($event->changes) === 1
+                && $event->changes[0]['name'] === 'TestCharacter';
         });
     }
 
@@ -98,7 +115,7 @@ class WorldScraperTest extends TestCase {
             'is_online' => false,
         ]);
 
-        $stub = new WorldScraperStub();
+        $stub = $this->app->make(WorldScraperStub::class);
         $stub->setFakeHtml(GuildPageHtml::listOfCharacters($onlineCharacter));
         $this->runStub($stub);
 
@@ -107,7 +124,7 @@ class WorldScraperTest extends TestCase {
         });
     }
 
-    public function testHandle_WhenNoOnlineCharacters_ShouldDispatchEventWithEmptyCollection(): void {
+    public function testHandle_WhenNoOnlineCharacters_ShouldDispatchEventWithRecentlyOfflineCharacters(): void {
         Event::fake();
         $guildName = GuildEnum::OUTLAW->value;
         Setting::factory()->create([
@@ -122,12 +139,13 @@ class WorldScraperTest extends TestCase {
             'online_at' => Carbon::now()->subMinutes(5),
         ]);
 
-        $stub = new WorldScraperStub();
+        $stub = $this->app->make(WorldScraperStub::class);
         $stub->setFakeHtml(GuildPageHtml::listOfCharacters($offlineCharacter));
         $this->runStub($stub);
 
         Event::assertDispatched(OnlineCharactersUpdated::class, function (OnlineCharactersUpdated $event) {
-            return $event->characters->isEmpty();
+            return count($event->changes) === 1
+                && $event->changes[0]['is_online'] === false;
         });
     }
 }
