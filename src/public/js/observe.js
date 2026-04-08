@@ -395,7 +395,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 console.error('[Broadcast] Falha ao conectar ao canal online-characters:', error);
             })
             .listen('OnlineCharactersUpdated', (event) => {
-                console.log('[Broadcast] Dados recebidos, atualizando a tela:', event);
+                //console.log('[Broadcast] Dados recebidos, atualizando a tela:', event);
                 applyDiff(event);
             });
     } else {

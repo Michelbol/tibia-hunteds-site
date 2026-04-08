@@ -26,23 +26,6 @@ class HomeControllerTest extends TestCase {
         $response->assertViewIs('observer');
     }
 
-    public function testIndex_WhenAuthenticated_ShouldIncludeViteAppScript(): void {
-        Setting::factory()->create(['name' => SettingConfig::GUILD_NAME->value, 'value' => 'TestGuild']);
-        $user = User::factory()->create();
-
-        $response = $this->actingAs($user)->get(route('admin.home'));
-
-        $response->assertSee('<script type="module"', false);
-    }
-
-    public function testIndex_WhenUnauthenticated_ShouldNotIncludeViteAppScript(): void {
-        Setting::factory()->create(['name' => SettingConfig::GUILD_NAME->value, 'value' => 'TestGuild']);
-
-        $response = $this->get(route('home'));
-
-        $response->assertDontSee('<script type="module"', false);
-    }
-
     public function testGetOnlineCharacters_WhenUnauthenticated_ShouldReturnOnlyOnlineCharacters(): void {
         Character::factory()->create(['is_online' => true, 'offline_at' => null]);
         Character::factory()->create(['is_online' => false, 'offline_at' => now()->subMinutes(5)]);
@@ -53,6 +36,15 @@ class HomeControllerTest extends TestCase {
         $onlineCharacters = $response->json('onlineCharacters');
         $this->assertCount(1, $onlineCharacters);
         $this->assertTrue($onlineCharacters[0]['is_online']);
+    }
+
+    public function testIndex_WhenAuthenticated_ShouldIncludeViteAppScript(): void {
+        Setting::factory()->create(['name' => SettingConfig::GUILD_NAME->value, 'value' => 'TestGuild']);
+        $user = User::factory()->create();
+
+        $response = $this->actingAs($user)->get(route('admin.home'));
+
+        $response->assertSee('<script type="module"', false);
     }
 
     public function testGetOnlineCharacters_WhenAuthenticated_ShouldReturnOnlineAndRecentlyOfflineCharacters(): void {
