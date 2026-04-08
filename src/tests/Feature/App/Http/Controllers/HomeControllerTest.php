@@ -30,7 +30,7 @@ class HomeControllerTest extends TestCase {
         Setting::factory()->create(['name' => SettingConfig::GUILD_NAME->value, 'value' => 'TestGuild']);
         $user = User::factory()->create();
 
-        $response = $this->actingAs($user)->get(route('home'));
+        $response = $this->actingAs($user)->get(route('admin.home'));
 
         $response->assertSee('<script type="module"', false);
     }

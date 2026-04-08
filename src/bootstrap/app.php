@@ -14,6 +14,7 @@ return Application::configure(basePath: dirname(__DIR__))
     ->withMiddleware(function (Middleware $middleware) {
         $middleware->append(\App\Http\Middleware\CorsMiddleware::class);
         $middleware->alias(['super_admin' => \App\Http\Middleware\SuperAdmin::class]);
+        $middleware->alias(['admin_redirect' => \App\Http\Middleware\AdminRedirect::class]);
     })
     ->withExceptions(function (Exceptions $exceptions) {
         //
