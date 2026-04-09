@@ -55,6 +55,20 @@ class HomeControllerTest extends TestCase {
         $response->assertSee('observe-offline.js', false);
     }
 
+    public function testIndex_WhenAuthenticated_ShouldLoadObserveJsBeforeOfflineJs(): void {
+        Setting::factory()->create(['name' => SettingConfig::GUILD_NAME->value, 'value' => 'TestGuild']);
+        $user = User::factory()->create();
+
+        $response = $this->actingAs($user)->get(route('admin.home'));
+
+        $content = $response->getContent();
+        $observeJsPos = strpos($content, 'observe.js');
+        $offlineJsPos = strpos($content, 'observe-offline.js');
+        $this->assertNotFalse($observeJsPos);
+        $this->assertNotFalse($offlineJsPos);
+        $this->assertLessThan($offlineJsPos, $observeJsPos, 'observe.js deve ser carregado antes de observe-offline.js');
+    }
+
     public function testIndex_WhenAuthenticated_ShouldIncludeViteAppScript(): void {
         Setting::factory()->create(['name' => SettingConfig::GUILD_NAME->value, 'value' => 'TestGuild']);
         $user = User::factory()->create();
