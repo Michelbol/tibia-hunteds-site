@@ -15,6 +15,8 @@ let createdAtMap = new Map();
 let positionTimeMap = new Map();
 let lastPlayed = serverDate();
 let lastOnlineCount = 0;
+let mainLogoffHistory = [];
+let lastMainLogoffAlertAt = 0;
 let isFetching = false;
 let charactersState = new Map();
 
@@ -256,15 +258,66 @@ function copyToClipboard(text) {
     });
 }
 
+function countMainLogoffs(updatedCharacters, removedNames = []) {
+    let count = 0;
+    updatedCharacters.forEach(c => {
+        if (c.type === 'main' && !c.is_online && charactersState.has(c.name) && charactersState.get(c.name).is_online) {
+            count++;
+        }
+    });
+    removedNames.forEach(name => {
+        const prev = charactersState.get(name);
+        if (prev && prev.type === 'main' && prev.is_online) {
+            count++;
+        }
+    });
+    return count;
+}
+
+const MAIN_LOGOFF_WINDOW_MS = 5 * 60 * 1000;
+const MAIN_LOGOFF_THRESHOLD = 5;
+const MAIN_LOGOFF_ALERT_COOLDOWN_MS = 5 * 60 * 1000;
+
+async function playMainLogoffAlert(count) {
+    showCopyToast(`⚠️ ${count} mains deslogaram nos últimos 5min!`, 5000);
+    await playSelectedSoundNTimes(1, 'deslogaram_main_chares.mp3');
+}
+
+function recordMainLogoffsAndCheck(newLogoffCount) {
+    const now = Date.now();
+    for (let i = 0; i < newLogoffCount; i++) {
+        mainLogoffHistory.push(now);
+    }
+    mainLogoffHistory = mainLogoffHistory.filter(t => now - t <= MAIN_LOGOFF_WINDOW_MS);
+
+    if (mainLogoffHistory.length >= MAIN_LOGOFF_THRESHOLD && now - lastMainLogoffAlertAt > MAIN_LOGOFF_ALERT_COOLDOWN_MS) {
+        lastMainLogoffAlertAt = now;
+        playMainLogoffAlert(mainLogoffHistory.length);
+    }
+}
+
 function processCharactersData(data) {
+    const incoming = data.onlineCharacters;
+    const incomingMap = new Map(incoming.map(c => [c.name, c]));
+    const newLogoffCount = [...charactersState.values()].filter(prev =>
+        prev.type === 'main' && prev.is_online &&
+        (!incomingMap.has(prev.name) || !incomingMap.get(prev.name).is_online)
+    ).length;
+
     charactersState.clear();
-    data.onlineCharacters.forEach(c => charactersState.set(c.name, c));
+    incoming.forEach(c => charactersState.set(c.name, c));
+
+    recordMainLogoffsAndCheck(newLogoffCount);
     renderFromState();
 }
 
 function applyDiff(event) {
+    const newLogoffCount = countMainLogoffs(event.changes, event.removed);
+
     event.changes.forEach(c => charactersState.set(c.name, c));
     event.removed.forEach(name => charactersState.delete(name));
+
+    recordMainLogoffsAndCheck(newLogoffCount);
     renderFromState();
 }
 
