@@ -321,6 +321,17 @@ function applyDiff(event) {
     renderFromState();
 }
 
+function getTableIdForCharacterType(type) {
+    return type === 'main' ? 'mainCharTable'
+        : type === 'bomba' ? 'bombasTable'
+        : type === 'bombao' ? 'bombaoTable'
+        : 'makersTable';
+}
+
+function renderOfflineCharacters(allCharacters) {
+    // Overridden by observe-offline.js for authenticated users
+}
+
 function renderFromState() {
     const allCharacters = [...charactersState.values()];
 
@@ -344,12 +355,6 @@ function renderFromState() {
             const timeB = serverDate() - serverDate(b.online_at + " UTC");
             return timeA - timeB;
         });
-    const offlineCharacters = allCharacters
-        .filter(c => !c.is_online)
-        .sort((a, b) => {
-            return serverDate(b.offline_at + " UTC") - serverDate(a.offline_at + " UTC");
-        });
-
     let mainIndex = 0, bombaIndex = 0, bombaoIndex = 0, makerIndex = 0;
 
     onlineCharacters.forEach(character => {
@@ -364,13 +369,7 @@ function renderFromState() {
         }
     });
 
-    offlineCharacters.forEach(character => {
-        const tableId = character.type === 'main' ? 'mainCharTable'
-            : character.type === 'bomba' ? 'bombasTable'
-            : character.type === 'bombao' ? 'bombaoTable'
-            : 'makersTable';
-        addRow(tableId, -1, character, true);
-    });
+    renderOfflineCharacters(allCharacters);
 
     document.getElementById('lastUpdate').textContent =
         `Atualizado em: ${serverDate().toLocaleTimeString()}`;

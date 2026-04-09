@@ -38,6 +38,23 @@ class HomeControllerTest extends TestCase {
         $this->assertTrue($onlineCharacters[0]['is_online']);
     }
 
+    public function testIndex_WhenUnauthenticated_ShouldNotIncludeOfflineScript(): void {
+        Setting::factory()->create(['name' => SettingConfig::GUILD_NAME->value, 'value' => 'TestGuild']);
+
+        $response = $this->get(route('home'));
+
+        $response->assertDontSee('observe-offline.js', false);
+    }
+
+    public function testIndex_WhenAuthenticated_ShouldIncludeOfflineScript(): void {
+        Setting::factory()->create(['name' => SettingConfig::GUILD_NAME->value, 'value' => 'TestGuild']);
+        $user = User::factory()->create();
+
+        $response = $this->actingAs($user)->get(route('admin.home'));
+
+        $response->assertSee('observe-offline.js', false);
+    }
+
     public function testIndex_WhenAuthenticated_ShouldIncludeViteAppScript(): void {
         Setting::factory()->create(['name' => SettingConfig::GUILD_NAME->value, 'value' => 'TestGuild']);
         $user = User::factory()->create();
