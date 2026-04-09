@@ -165,6 +165,9 @@
     <script>
         window.SERVER_TIME = "{{ now()->format('Y-m-d H:i:s') }}";
     </script>
+    @if(Auth::hasUser())
+        <script src="{{ asset('js/observe-offline.js?v=202604090000') }}"></script>
+    @endif
     <script src="{{ asset('js/observe.js?v=202604080000') }}"></script>
 
 @endsection
