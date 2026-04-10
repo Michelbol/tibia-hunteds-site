@@ -5,6 +5,18 @@
 
 @push('css')
     <link rel="stylesheet" href="{{ asset('css/observe.css?v=202603100000') }}">
+    <style>
+        .free-title-row td {
+            text-align: center;
+            font-weight: bold;
+            background-color: #2a2a2a;
+            color: #aaa;
+            font-size: 12px;
+            padding: 4px;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+        }
+    </style>
 @endpush
 
 @section('content')
