@@ -20,6 +20,12 @@ let lastMainLogoffAlertAt = 0;
 let isFetching = false;
 let charactersState = new Map();
 
+const FREE_VOCATIONS = ['Druid', 'Sorcerer', 'Paladin', 'Knight'];
+
+function isFreeVocation(vocation) {
+    return FREE_VOCATIONS.includes(vocation);
+}
+
 function formatToHHMMSS(seconds) {
     const h = String(Math.floor(seconds / 3600)).padStart(2, '0');
     const m = String(Math.floor((seconds % 3600) / 60)).padStart(2, '0');
@@ -328,6 +334,14 @@ function getTableIdForCharacterType(type) {
         : 'makersTable';
 }
 
+function addFreeTitle(tableId) {
+    const tbody = document.querySelector(`#${tableId} tbody`);
+    const row = document.createElement('tr');
+    row.className = 'free-title-row';
+    row.innerHTML = `<td colspan="7">Free</td>`;
+    tbody.appendChild(row);
+}
+
 function renderOfflineCharacters(allCharacters) {
     // Overridden by observe-offline.js for authenticated users
 }
@@ -355,17 +369,30 @@ function renderFromState() {
             const timeB = serverDate() - serverDate(b.online_at + " UTC");
             return timeA - timeB;
         });
-    let mainIndex = 0, bombaIndex = 0, bombaoIndex = 0, makerIndex = 0;
+
+    const tableGroups = {
+        main: { tableId: 'mainCharTable', regular: [], free: [] },
+        bomba: { tableId: 'bombasTable', regular: [], free: [] },
+        bombao: { tableId: 'bombaoTable', regular: [], free: [] },
+        maker: { tableId: 'makersTable', regular: [], free: [] },
+    };
 
     onlineCharacters.forEach(character => {
-        if (character.type === 'main') {
-            addRow('mainCharTable', mainIndex++, character);
-        } else if (character.type === 'bomba') {
-            addRow('bombasTable', bombaIndex++, character);
-        } else if (character.type === 'bombao') {
-            addRow('bombaoTable', bombaoIndex++, character);
+        const groupKey = tableGroups[character.type] ? character.type : 'maker';
+        const group = tableGroups[groupKey];
+        if (isFreeVocation(character.vocation)) {
+            group.free.push(character);
         } else {
-            addRow('makersTable', makerIndex++, character);
+            group.regular.push(character);
+        }
+    });
+
+    Object.values(tableGroups).forEach(({ tableId, regular, free }) => {
+        let index = 0;
+        regular.forEach(character => addRow(tableId, index++, character));
+        if (free.length > 0) {
+            addFreeTitle(tableId);
+            free.forEach(character => addRow(tableId, index++, character));
         }
     });
 
