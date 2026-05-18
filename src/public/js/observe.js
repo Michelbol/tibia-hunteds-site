@@ -20,6 +20,71 @@ let lastMainLogoffAlertAt = 0;
 let isFetching = false;
 let charactersState = new Map();
 
+const tableSortState = {
+    mainCharTable: { column: 'online_time', direction: 'asc' },
+    bombasTable:   { column: 'online_time', direction: 'asc' },
+    bombaoTable:   { column: 'online_time', direction: 'asc' },
+    makersTable:   { column: 'online_time', direction: 'asc' },
+};
+
+const COLUMN_DEFAULT_DIRECTION = {
+    online_time: 'asc',
+    level: 'desc',
+    vocation: 'asc',
+};
+
+function getSortComparator(column, direction) {
+    const asc = direction === 'asc' ? 1 : -1;
+    switch (column) {
+        case 'level':
+            return (a, b) => asc * (b.level - a.level);
+        case 'vocation':
+            return (a, b) => asc * a.vocation.localeCompare(b.vocation);
+        case 'online_time':
+        default:
+            return (a, b) => {
+                const timeA = serverDate() - serverDate(a.online_at + " UTC");
+                const timeB = serverDate() - serverDate(b.online_at + " UTC");
+                return asc * (timeA - timeB);
+            };
+    }
+}
+
+function updateSortIndicators(tableId) {
+    const table = document.getElementById(tableId);
+    if (!table) return;
+    const state = tableSortState[tableId];
+    table.querySelectorAll('th[data-sort-column]').forEach(th => {
+        const existing = th.querySelector('.sort-indicator');
+        if (existing) existing.remove();
+        if (th.dataset.sortColumn === state.column) {
+            const indicator = document.createElement('span');
+            indicator.className = 'sort-indicator';
+            indicator.textContent = state.direction === 'asc' ? ' ▲' : ' ▼';
+            th.appendChild(indicator);
+        }
+    });
+}
+
+function initSortableHeaders() {
+    document.querySelectorAll('th[data-sort-column]').forEach(th => {
+        th.addEventListener('click', () => {
+            const tableId = th.closest('table').id;
+            const column = th.dataset.sortColumn;
+            const state = tableSortState[tableId];
+            if (state.column === column) {
+                state.direction = state.direction === 'asc' ? 'desc' : 'asc';
+            } else {
+                state.column = column;
+                state.direction = COLUMN_DEFAULT_DIRECTION[column];
+            }
+            updateSortIndicators(tableId);
+            renderFromState();
+        });
+    });
+    Object.keys(tableSortState).forEach(updateSortIndicators);
+}
+
 const FREE_VOCATIONS = ['Druid', 'Sorcerer', 'Paladin', 'Knight'];
 
 function isFreeVocation(vocation) {
@@ -362,13 +427,7 @@ function renderFromState() {
     createdAtMap.clear();
     positionTimeMap.clear();
 
-    const onlineCharacters = allCharacters
-        .filter(c => c.is_online)
-        .sort((a, b) => {
-            const timeA = serverDate() - serverDate(a.online_at + " UTC");
-            const timeB = serverDate() - serverDate(b.online_at + " UTC");
-            return timeA - timeB;
-        });
+    const onlineCharacters = allCharacters.filter(c => c.is_online);
 
     const tableGroups = {
         main: { tableId: 'mainCharTable', regular: [], free: [] },
@@ -388,6 +447,10 @@ function renderFromState() {
     });
 
     Object.values(tableGroups).forEach(({ tableId, regular, free }) => {
+        const { column, direction } = tableSortState[tableId];
+        const comparator = getSortComparator(column, direction);
+        regular.sort(comparator);
+        free.sort(comparator);
         let index = 0;
         regular.forEach(character => addRow(tableId, index++, character));
         if (free.length > 0) {
@@ -465,6 +528,7 @@ setInterval(updatePositionTimeTimers, 1000);
 fetchOnlineCharacters();
 
 document.addEventListener('DOMContentLoaded', function () {
+    initSortableHeaders();
     if (window.Echo) {
         window.Echo.channel('online-characters')
             .subscribed(() => {

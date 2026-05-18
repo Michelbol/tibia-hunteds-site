@@ -16,6 +16,17 @@
             letter-spacing: 1px;
             text-transform: uppercase;
         }
+        th[data-sort-column] {
+            cursor: pointer;
+            user-select: none;
+        }
+        th[data-sort-column]:hover {
+            opacity: 0.8;
+        }
+        .sort-indicator {
+            font-size: 10px;
+            margin-left: 4px;
+        }
     </style>
 @endpush
 
@@ -51,9 +62,9 @@
                 <tr>
                     <th>#</th>
                     <th>Name</th>
-                    <th>Level</th>
-                    <th>Vocation</th>
-                    <th>Tempo Online</th>
+                    <th data-sort-column="level">Level</th>
+                    <th data-sort-column="vocation">Vocation</th>
+                    <th data-sort-column="online_time">Tempo Online</th>
                     <th>Tempo Exiva</th>
                     <th>Exiva</th>
                 </tr>
@@ -69,9 +80,9 @@
                 <tr>
                     <th>#</th>
                     <th>Name</th>
-                    <th>Level</th>
-                    <th>Vocation</th>
-                    <th>Tempo Online</th>
+                    <th data-sort-column="level">Level</th>
+                    <th data-sort-column="vocation">Vocation</th>
+                    <th data-sort-column="online_time">Tempo Online</th>
                     <th>Tempo Exiva</th>
                     <th>Exiva</th>
                 </tr>
@@ -87,9 +98,9 @@
                 <tr>
                     <th>#</th>
                     <th>Name</th>
-                    <th>Level</th>
-                    <th>Vocation</th>
-                    <th>Tempo Online</th>
+                    <th data-sort-column="level">Level</th>
+                    <th data-sort-column="vocation">Vocation</th>
+                    <th data-sort-column="online_time">Tempo Online</th>
                     <th>Tempo Exiva</th>
                     <th>Exiva</th>
                 </tr>
@@ -105,9 +116,9 @@
                 <tr>
                     <th>#</th>
                     <th>Name</th>
-                    <th>Level</th>
-                    <th>Vocation</th>
-                    <th>Tempo Online</th>
+                    <th data-sort-column="level">Level</th>
+                    <th data-sort-column="vocation">Vocation</th>
+                    <th data-sort-column="online_time">Tempo Online</th>
                     <th>Tempo Exiva</th>
                     <th>Exiva</th>
                 </tr>

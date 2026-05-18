@@ -1,10 +1,20 @@
 # Regras do Projeto
 
+# Contexto
+
+Esse é um projeto PHP com laravel, que tem como objetivo listar os players de um jogo online
+Atualmente temos 1 scheduler que fica batendo requisições em uma página específica e de lá ele busca os chares online e salva esses dados no banco.
+
+Rodando em paralelo, tenho uma visualização, aonde é listado os chares online e tem algumas opções na tela.
+
+As features dessa tela são:
+ - Copiar o exiva de um player para saber a localização dele no jogo
+ - Avisar quando muitos chares bomba/bombao/maker logarem ao mesmo tempo
+ - Avisar quando muitos chares main deslogarem ao mesmo tempo
+ - Mostrar a quanto tempo online o player está
+
 ## Planejamento
 - Sempre que for solicitado para criar um plano, quebre em etapas numeradas e sequenciais, com descrição clara do que será feito em cada uma.
-
-## Pull Requests
-- Todo pull request criado deve ter no máximo 250 alterações de linhas (additions + deletions). Se a implementação ultrapassar esse limite, divida em múltiplos PRs menores e sequenciais.
 
 ## Alterações em código
 - Utilize boas práticas de programação, como SOLID, Object Calisthenics e Clean Code
